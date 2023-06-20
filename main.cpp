@@ -23,10 +23,6 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Use core profile (no backwards compatibility)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Allow forward compatibility
 
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
     // Create window
     GLFWwindow* mainWindow = glfwCreateWindow(WIDTH, HEIGHT, "Udemy OpenGL Course", NULL, NULL);
     if (!mainWindow)
