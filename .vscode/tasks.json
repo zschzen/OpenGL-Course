@@ -16,7 +16,7 @@
                 "${workspaceFolder}/*.cpp",
                 "${workspaceFolder}/dependencies/lib/libGLEW.2.2.0.dylib",
                 "-o",
-                "${workspaceFolder}/app",
+                "${workspaceFolder}/Build/app",
                 "-framework",
                 "OpenGL",
                 "-framework",
