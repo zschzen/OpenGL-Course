@@ -14,6 +14,7 @@
                 "-I${workspaceFolder}/dependencies/include",
                 "-L${workspaceFolder}/dependencies/lib",
                 "${workspaceFolder}/*.cpp",
+                "${workspaceFolder}/Core/Private/*.cpp",
                 "${workspaceFolder}/dependencies/lib/*.dylib",
                 "-o",
                 "${workspaceFolder}/Build/app",
