@@ -10,35 +10,38 @@
 
 // Window dimensions
 const GLint WIDTH = 800, HEIGHT = 600;
+const GLfloat ASPECT_RATIO = (GLfloat)WIDTH / (GLfloat)HEIGHT;
 
-const float toRadians = glm::pi<float>() / 180.0f;
+// Camera settings
+const float FOV = 45.0f;
+const float NEAR_PLANE = 0.1f;
+const float FAR_PLANE = 100.0f;
+
+// Math constants
+const float DEG_TO_RAD = glm::pi<float>() / 180.0f;
 
 // Triangle data
-GLuint VAO, VBO, IBO, shader, uniformModel;
-
-// Triangle movement
-bool direction = true;
-float triOffset = 0.0f;
-float triMaxOffset = 0.7f;
-float triIncrement = 0.005f;
+GLuint VAO, VBO, IBO, shader, uniformModel, uniformProjection;
 
 // Vertex shader
-static const char* vertexShader = "                                     \n\
+static const char *vertexShader = "                                     \n\
 #version 330                                                            \n\
                                                                         \n\
-layout (location = 0) in vec3 pos;                                      \n\
 out vec4 vCol;                                                          \n\
                                                                         \n\
+layout (location = 0) in vec3 pos;                                      \n\
+                                                                        \n\
 uniform mat4 model;                                                     \n\
+uniform mat4 projection;                                                \n\
                                                                         \n\
 void main()                                                             \n\
 {                                                                       \n\
-    gl_Position = model * vec4(pos, 1.0);                               \n\
+    gl_Position = projection * model * vec4(pos, 1.0);                  \n\
     vCol = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);                          \n\
 }";
 
 // Fragment shader
-static const char* fragmentShader = "                                   \n\
+static const char *fragmentShader = "                                   \n\
 #version 330                                                            \n\
                                                                         \n\
 in vec4 vCol;                                                           \n\
@@ -52,18 +55,17 @@ void main()                                                             \n\
 void CreateTriangle()
 {
     unsigned int indices[] = {
-        0, 3, 1,    // Right side
-        1, 3, 2,    // Left side
-        2, 3, 0,    // Front side
-        0, 1, 2     // Base
+        0, 3, 1, // Right side
+        1, 3, 2, // Left side
+        2, 3, 0, // Front side
+        0, 1, 2  // Base
     };
 
     GLfloat vertices[] = {
-		-1.0f, -1.0f, 0.0f,
-		0.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, 0.0f,
-		0.0f, 1.0f, 0.0f
-    };
+        -1.0f, -1.0f, 0.0f,
+        0.0f, -1.0f, 1.0f,
+        1.0f, -1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f};
 
     // Generate vertex array object
     glGenVertexArrays(1, &VAO);
@@ -85,8 +87,8 @@ void CreateTriangle()
     glEnableVertexAttribArray(0); // Enable id 0
 
     // Unbind buffers
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     glBindVertexArray(0);
 }
@@ -163,10 +165,12 @@ void CompileShaders()
     {
         glGetProgramInfoLog(shader, sizeof(eLog), NULL, eLog);
         printf("Error validating program: '%s'\n", eLog);
-        return;
+        //return;
     }
 
+    // Get uniform locations
     uniformModel = glGetUniformLocation(shader, "model");
+    uniformProjection = glGetUniformLocation(shader, "projection");
 }
 
 int main()
@@ -223,23 +227,12 @@ int main()
     CreateTriangle();
     CompileShaders();
 
+    // Create projection matrix
+    glm::mat4 projection = glm::perspective(FOV, ASPECT_RATIO, NEAR_PLANE, FAR_PLANE);
+
     // Main loop
     do
     {
-        if (direction)
-        {
-            triOffset += triIncrement;
-        }
-        else
-        {
-            triOffset -= triIncrement;
-        }
-
-        if (abs(triOffset) >= triMaxOffset)
-        {
-            direction = !direction;
-        }
-
         // Get input events
         glfwPollEvents();
 
@@ -255,11 +248,13 @@ int main()
 
         // TRANSLATION
         glm::mat4 model(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, -2.5f));
+        model = glm::rotate(model, 45.0f * DEG_TO_RAD * (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
-        //model = glm::translate(model, glm::vec3(triOffset, 0.0f, triOffset ));
-        model = glm::rotate(model, 45.0f * toRadians * (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
 
+        // Set uniform variables
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 
         // Bind vertex array object
         glBindVertexArray(VAO);
