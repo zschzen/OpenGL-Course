@@ -4,21 +4,32 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 // Window dimensions
 const GLint WIDTH = 800, HEIGHT = 600;
 
 // Triangle data
-GLuint VAO, VBO, shader;
+GLuint VAO, VBO, shader, uniformModel;
+
+// Triangle movement
+bool direction = true;
+float triOffset = 0.0f;
+float triMaxOffset = 0.7f;
+float triIncrement = 0.005f;
 
 // Vertex shader
 static const char *vertexShader = "                                     \n\
 #version 330                                                            \n\
                                                                         \n\
 layout (location = 0) in vec3 pos;                                      \n\
+uniform mat4 model;                                                     \n\
                                                                         \n\
 void main()                                                             \n\
 {                                                                       \n\
-    gl_Position = vec4(0.4 * pos.x, 0.4 * pos.y, pos.z, 1.0);           \n\
+    gl_Position = model * vec4(0.4 * pos.x, 0.4 * pos.y, pos.z, 1.0);  \n\
 }";
 
 // Fragment shader
@@ -59,13 +70,13 @@ void CreateTriangle()
     glBindVertexArray(0);
 }
 
-void AddShader(GLuint program, const char* shaderCode, GLenum shaderType)
+void AddShader(GLuint program, const char *shaderCode, GLenum shaderType)
 {
     // Create shader object
     GLuint newShader = glCreateShader(shaderType);
 
     // Get shader source
-    const GLchar* code[1];
+    const GLchar *code[1];
     code[0] = shaderCode;
 
     // Get code length
@@ -84,7 +95,7 @@ void AddShader(GLuint program, const char* shaderCode, GLenum shaderType)
     glGetShaderiv(newShader, GL_COMPILE_STATUS, &result);
     if (!result)
     {
-        const char* shaderTypeStr = shaderType == GL_VERTEX_SHADER ? "vertex" : "fragment";
+        const char *shaderTypeStr = shaderType == GL_VERTEX_SHADER ? "vertex" : "fragment";
         glGetShaderInfoLog(newShader, sizeof(eLog), NULL, eLog); // Get error log
         printf("Error compiling the %s shader: '%s'\n", shaderTypeStr, eLog);
         return;
@@ -133,6 +144,8 @@ void CompileShaders()
         printf("Error validating program: '%s'\n", eLog);
         return;
     }
+
+    uniformModel = glGetUniformLocation(shader, "model");
 }
 
 int main()
@@ -153,7 +166,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);           // Allow forward compatibility
 
     // Create window
-    GLFWwindow* mainWindow = glfwCreateWindow(WIDTH, HEIGHT, "Udemy OpenGL Course", NULL, NULL);
+    GLFWwindow *mainWindow = glfwCreateWindow(WIDTH, HEIGHT, "Udemy OpenGL Course", NULL, NULL);
     if (!mainWindow)
     {
         printf("GLFW Window creation failed!");
@@ -189,6 +202,20 @@ int main()
     // Main loop
     do
     {
+        if (direction)
+        {
+            triOffset += triIncrement;
+        }
+        else
+        {
+            triOffset -= triIncrement;
+        }
+
+        if (abs(triOffset) >= triMaxOffset)
+        {
+            direction = !direction;
+        }
+
         // Get input events
         glfwPollEvents();
 
@@ -201,6 +228,12 @@ int main()
 
         // Use shader program
         glUseProgram(shader);
+
+        // TRANSLATION
+        glm::mat4 model(1.0f);
+        model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
+
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
