@@ -10,6 +10,7 @@
 
 // Window dimensions
 const GLint WIDTH = 800, HEIGHT = 600;
+float toRadians = glm::pi<float>() / 180.0f;
 
 // Triangle data
 GLuint VAO, VBO, shader, uniformModel;
@@ -21,7 +22,7 @@ float triMaxOffset = 0.7f;
 float triIncrement = 0.005f;
 
 // Vertex shader
-static const char *vertexShader = "                                     \n\
+static const char* vertexShader = "                                     \n\
 #version 330                                                            \n\
                                                                         \n\
 layout (location = 0) in vec3 pos;                                      \n\
@@ -29,11 +30,11 @@ uniform mat4 model;                                                     \n\
                                                                         \n\
 void main()                                                             \n\
 {                                                                       \n\
-    gl_Position = model * vec4(0.4 * pos.x, 0.4 * pos.y, pos.z, 1.0);  \n\
+    gl_Position = model * vec4(pos, 1.0);                               \n\
 }";
 
 // Fragment shader
-static const char *fragmentShader = "                                   \n\
+static const char* fragmentShader = "                                   \n\
 #version 330                                                            \n\
                                                                         \n\
 out vec4 tint;                                                          \n\
@@ -231,7 +232,10 @@ int main()
 
         // TRANSLATION
         glm::mat4 model(1.0f);
-        model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
+
+        model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
+        //model = glm::translate(model, glm::vec3(triOffset, 0.0f, triOffset ));
+        //model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
 
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 

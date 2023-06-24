@@ -13,7 +13,8 @@
                 "cwd": "${fileDirname}",
                 "environment": [],
                 "externalConsole": false,
-                "MIMode": "lldb"
+                "MIMode": "lldb",
+                "preLaunchTask": "Build",
             }
     ]
 }
