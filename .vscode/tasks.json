@@ -14,7 +14,7 @@
                 "-I${workspaceFolder}/dependencies/include",
                 "-L${workspaceFolder}/dependencies/lib",
                 "${workspaceFolder}/*.cpp",
-                "${workspaceFolder}/dependencies/lib/libGLEW.2.2.0.dylib",
+                "${workspaceFolder}/dependencies/lib/*.dylib",
                 "-o",
                 "${workspaceFolder}/Build/app",
                 "-framework",
