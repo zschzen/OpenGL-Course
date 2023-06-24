@@ -10,10 +10,11 @@
 
 // Window dimensions
 const GLint WIDTH = 800, HEIGHT = 600;
-float toRadians = glm::pi<float>() / 180.0f;
+
+const float toRadians = glm::pi<float>() / 180.0f;
 
 // Triangle data
-GLuint VAO, VBO, shader, uniformModel;
+GLuint VAO, VBO, IBO, shader, uniformModel;
 
 // Triangle movement
 bool direction = true;
@@ -26,35 +27,52 @@ static const char* vertexShader = "                                     \n\
 #version 330                                                            \n\
                                                                         \n\
 layout (location = 0) in vec3 pos;                                      \n\
+out vec4 vCol;                                                          \n\
+                                                                        \n\
 uniform mat4 model;                                                     \n\
                                                                         \n\
 void main()                                                             \n\
 {                                                                       \n\
     gl_Position = model * vec4(pos, 1.0);                               \n\
+    vCol = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);                          \n\
 }";
 
 // Fragment shader
 static const char* fragmentShader = "                                   \n\
 #version 330                                                            \n\
                                                                         \n\
+in vec4 vCol;                                                           \n\
 out vec4 tint;                                                          \n\
                                                                         \n\
 void main()                                                             \n\
 {                                                                       \n\
-    tint = vec4(1.0, 0.47, 0.78, 1.0);                                  \n\
+    tint = vCol;                                                        \n\
 }";
 
 void CreateTriangle()
 {
+    unsigned int indices[] = {
+        0, 3, 1,    // Right side
+        1, 3, 2,    // Left side
+        2, 3, 0,    // Front side
+        0, 1, 2     // Base
+    };
+
     GLfloat vertices[] = {
-        -1.0f, -1.0f, 0.0f, // Bottom left corner
-        1.0f, -1.0f, 0.0f,  // Bottom right corner
-        0.0f, 1.0f, 0.0f    // Top corner
+		-1.0f, -1.0f, 0.0f,
+		0.0f, -1.0f, 1.0f,
+		1.0f, -1.0f, 0.0f,
+		0.0f, 1.0f, 0.0f
     };
 
     // Generate vertex array object
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
+
+    // Generate index buffer object
+    glGenBuffers(1, &IBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // Generate vertex buffer object
     glGenBuffers(1, &VBO);
@@ -67,7 +85,9 @@ void CreateTriangle()
     glEnableVertexAttribArray(0); // Enable id 0
 
     // Unbind buffers
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     glBindVertexArray(0);
 }
 
@@ -193,6 +213,9 @@ int main()
         return 1;
     }
 
+    // Enable depth testing
+    glEnable(GL_DEPTH_TEST);
+
     // Setup viewport size
     glViewport(0, 0, bufferWidth, bufferHeight);
 
@@ -222,7 +245,7 @@ int main()
 
         // Clear window
         glClearColor(0.16f, 0.16f, 0.21f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // RENDERING
         // ------------------------------
@@ -232,17 +255,21 @@ int main()
 
         // TRANSLATION
         glm::mat4 model(1.0f);
-
         model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
         //model = glm::translate(model, glm::vec3(triOffset, 0.0f, triOffset ));
-        //model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::rotate(model, 45.0f * toRadians * (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
 
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
+        // Bind vertex array object
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+
+        // Draw triangle
+        glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
 
         // Unbind
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
         glUseProgram(0);
 
