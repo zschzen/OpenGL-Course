@@ -25,13 +25,14 @@ int Window::Initialize()
 
     // Setup GLFW
     // OpenGL 3.3 (MAJOR.MINOR)
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);                 // Set major version to 3
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);                 // Set minor version to 3
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Use core profile (no backwards compatibility)
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);           // Allow forward compatibility
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);                 	// Set major version to 3
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);                 	// Set minor version to 3
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); 	// Use core profile (no backwards compatibility)
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);           	// Allow forward compatibility
+	glfwWindowHint(GLFW_SAMPLES, 8);								// 8x antialiasing
 
 	// Create the window
-	mainWindow = glfwCreateWindow(width, height, "Udemy OpenGL Course", NULL, NULL);
+	mainWindow = glfwCreateWindow(width, height, "OpenGL", NULL, NULL);
 	if (!mainWindow)
 	{
 		printf("Error creating GLFW window!");
@@ -59,6 +60,7 @@ int Window::Initialize()
 
     // Enable depth
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_MULTISAMPLE);
 
 	// Create Viewport
 	glViewport(0, 0, bufferWidth, bufferHeight);
