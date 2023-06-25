@@ -107,9 +107,6 @@ int main()
 		// Update the window
 		RenderScene();
 
-		// Unbind shader
-		glUseProgram(0);
-
 		// Swap the buffers
 		mainWindow.swapBuffers();
 	}
@@ -131,6 +128,7 @@ void RenderScene()
 	// Update the projection matrix
 	glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 
+	// Render the scene
 	for (size_t i = 0; i < meshList.size(); ++i)
 	{
 		model = glm::mat4(1.0f);
@@ -145,5 +143,6 @@ void RenderScene()
 		meshList[i]->RenderMesh();
 	}
 
+	// Unbind the shader
 	glUseProgram(0);
 }
