@@ -20,17 +20,22 @@
 
 #include "Core/Public/Shapes.h"
 
+// Scene rendering
 Window mainWindow;
 std::vector<Mesh *> meshList;
 std::vector<Shader> shaderList;
 
+// Rendering matrices and uniforms
+glm::mat4 projection = glm::mat4(1.0f);
+glm::mat4 model = glm::mat4(1.0f);
+GLuint uniformProjection = 0, uniformModel = 0;
+
+// Frame rate control
 const int MAX_FPS = 60;
 double deltaTime = 0.0f;
 
-// Vertex Shader
+// Shader paths
 static const char *vShader = "./Shaders/shader.vert";
-
-// Fragment Shader
 static const char *fShader = "./Shaders/shader.frag";
 
 // Model path
@@ -55,6 +60,7 @@ void CreateShaders()
 
 int main()
 {
+	// Create the window
 	mainWindow = Window(800, 600);
 	mainWindow.Initialize();
 
@@ -65,13 +71,12 @@ int main()
 	double previousFrameTime = glfwGetTime();
 	double currentFrameTime = 0.0f;
 
+	// Create the scene
 	CreateObjects();
 	CreateShaders();
 
-	GLuint uniformProjection = 0, uniformModel = 0;
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), mainWindow.getAspectRatio(), 0.1f, 100.0f);
-
-	glm::mat4 model(1.0f);
+	// Create the projection matrix
+	projection = glm::perspective(glm::radians(45.0f), mainWindow.getAspectRatio(), 0.1f, 100.0f);
 
 	// Loop until window closed
 	while (!mainWindow.getShouldClose())
@@ -85,8 +90,10 @@ int main()
 		{
 			// Sleep to limit the frame rate
 			double sleepTime = (desiredFrameTime - deltaTime) * 1000;
-			if (sleepTime > 0)
-				std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(sleepTime)));
+			if (sleepTime <= 0.0f) continue;
+			
+			// Sleep for the remaining time
+			std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(sleepTime)));
 
 			continue;
 		}
@@ -97,32 +104,46 @@ int main()
 		// Get + Handle User Input
 		glfwPollEvents();
 
-		// Clear the window
-		glClearColor(0.16f, 0.16f, 0.21f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// Update the window
+		RenderScene();
 
-		shaderList[0].UseShader();
-		uniformModel = shaderList[0].GetModelLocation();
-		uniformProjection = shaderList[0].GetProjectionLocation();
-
-		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
-
-		for (size_t i = 0; i < meshList.size(); ++i)
-		{
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, -0.5f, -5.0f));
-			model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
-			model = glm::rotate(model, glm::radians(45.0f) * -(GLfloat)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
-			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-
-			// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			meshList[i]->RenderMesh();
-		}
-
+		// Unbind shader
 		glUseProgram(0);
 
+		// Swap the buffers
 		mainWindow.swapBuffers();
 	}
 
 	return 0;
+}
+
+void RenderScene()
+{
+	// Clear the window
+	glClearColor(0.16f, 0.16f, 0.21f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Update the shader
+	shaderList[0].UseShader();
+	uniformModel = shaderList[0].GetModelLocation();
+	uniformProjection = shaderList[0].GetProjectionLocation();
+
+	// Update the projection matrix
+	glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+
+	for (size_t i = 0; i < meshList.size(); ++i)
+	{
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, -0.5f, -5.0f));
+		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+		model = glm::rotate(model, glm::radians(45.0f) * -(GLfloat)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+		
+		// Update the model matrix
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+
+		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		meshList[i]->RenderMesh();
+	}
+
+	glUseProgram(0);
 }
