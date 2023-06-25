@@ -15,12 +15,16 @@ public:
     int Initialize();
 
     // Getters
-    GLint getBufferWidth() { return bufferWidth; }
-    GLint getBufferHeight() { return bufferHeight; }
-    GLfloat getAspectRatio() { return aspectRatio; }
+     GLint getBufferWidth() { return bufferWidth; }
+     GLint getBufferHeight() { return bufferHeight; }
+     GLfloat getAspectRatio() { return aspectRatio; }
+     bool getShouldClose() { return glfwWindowShouldClose(mainWindow); }
 
-    bool getShouldClose() { return glfwWindowShouldClose(mainWindow); }
+    // Setters
+     void setShouldClose(bool shouldClose) { glfwSetWindowShouldClose(mainWindow, shouldClose); }
+     void setWindowLabel(const char* label) { glfwSetWindowTitle(mainWindow, label); }
 
+    // Other
     void swapBuffers() { glfwSwapBuffers(mainWindow); }
 
     ~Window();

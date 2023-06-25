@@ -79,7 +79,7 @@ void RenderScene()
 		model = glm::translate(model, glm::vec3(0.0f, -0.5f, -5.0f));
 		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
 		model = glm::rotate(model, glm::radians(45.0f) * -(GLfloat)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
-		
+
 		// Update the model matrix
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -124,7 +124,7 @@ int main()
 			// Sleep to limit the frame rate
 			double sleepTime = (desiredFrameTime - deltaTime) * 1000;
 			if (sleepTime <= 0.0f) continue;
-			
+
 			// Sleep for the remaining time
 			std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(sleepTime)));
 
@@ -136,6 +136,10 @@ int main()
 
 		// Get + Handle User Input
 		glfwPollEvents();
+
+		// Update the window label
+		std::string windowLabel = "OpenGL | FPS: " + std::to_string(static_cast<int>(1.0 / deltaTime));
+		mainWindow.setWindowLabel(windowLabel.c_str());
 
 		// Update the window
 		RenderScene();
