@@ -58,6 +58,39 @@ void CreateShaders()
 	shaderList.push_back(*shader1);
 }
 
+void RenderScene()
+{
+	// Clear the window
+	glClearColor(0.16f, 0.16f, 0.21f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Update the shader
+	shaderList[0].UseShader();
+	uniformModel = shaderList[0].GetModelLocation();
+	uniformProjection = shaderList[0].GetProjectionLocation();
+
+	// Update the projection matrix
+	glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+
+	// Render the scene
+	for (size_t i = 0; i < meshList.size(); ++i)
+	{
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, -0.5f, -5.0f));
+		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+		model = glm::rotate(model, glm::radians(45.0f) * -(GLfloat)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+		
+		// Update the model matrix
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+
+		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		meshList[i]->RenderMesh();
+	}
+
+	// Unbind the shader
+	glUseProgram(0);
+}
+
 int main()
 {
 	// Create the window
@@ -112,37 +145,4 @@ int main()
 	}
 
 	return 0;
-}
-
-void RenderScene()
-{
-	// Clear the window
-	glClearColor(0.16f, 0.16f, 0.21f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// Update the shader
-	shaderList[0].UseShader();
-	uniformModel = shaderList[0].GetModelLocation();
-	uniformProjection = shaderList[0].GetProjectionLocation();
-
-	// Update the projection matrix
-	glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
-
-	// Render the scene
-	for (size_t i = 0; i < meshList.size(); ++i)
-	{
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, -0.5f, -5.0f));
-		model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
-		model = glm::rotate(model, glm::radians(45.0f) * -(GLfloat)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
-		
-		// Update the model matrix
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-
-		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		meshList[i]->RenderMesh();
-	}
-
-	// Unbind the shader
-	glUseProgram(0);
 }
