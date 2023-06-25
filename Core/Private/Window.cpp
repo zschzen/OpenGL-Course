@@ -31,6 +31,9 @@ int Window::Initialize()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);           	// Allow forward compatibility
 	glfwWindowHint(GLFW_SAMPLES, 8);								// 8x antialiasing
 
+	// Enable vsync
+	glfwSwapInterval(1);
+
 	// Create the window
 	mainWindow = glfwCreateWindow(width, height, "OpenGL", NULL, NULL);
 	if (!mainWindow)

@@ -2,6 +2,8 @@
 #include <string.h>
 #include <cmath>
 #include <vector>
+#include <chrono>
+#include <thread>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -21,6 +23,9 @@
 Window mainWindow;
 std::vector<Mesh *> meshList;
 std::vector<Shader> shaderList;
+
+const int MAX_FPS = 60;
+double deltaTime = 0.0f;
 
 // Vertex Shader
 static const char *vShader = "./Shaders/shader.vert";
@@ -53,6 +58,13 @@ int main()
 	mainWindow = Window(800, 600);
 	mainWindow.Initialize();
 
+	// Calculate the desired frame time in seconds
+	double desiredFrameTime = 1.0 / MAX_FPS;
+
+	// Variables for frame rate control
+	double previousFrameTime = glfwGetTime();
+	double currentFrameTime = 0.0f;
+
 	CreateObjects();
 	CreateShaders();
 
@@ -64,6 +76,24 @@ int main()
 	// Loop until window closed
 	while (!mainWindow.getShouldClose())
 	{
+		// Calculate the time elapsed since the previous frame
+		currentFrameTime = glfwGetTime();
+		deltaTime = currentFrameTime - previousFrameTime;
+
+		// Limit the frame rate
+		if (deltaTime < desiredFrameTime)
+		{
+			// Sleep to limit the frame rate
+			double sleepTime = (desiredFrameTime - deltaTime) * 1000;
+			if (sleepTime > 0)
+				std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(sleepTime)));
+
+			continue;
+		}
+
+		// Update the previous frame time
+		previousFrameTime = currentFrameTime;
+
 		// Get + Handle User Input
 		glfwPollEvents();
 
@@ -85,7 +115,7 @@ int main()
 			model = glm::rotate(model, glm::radians(45.0f) * -(GLfloat)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
 			glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
-			//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			meshList[i]->RenderMesh();
 		}
 
