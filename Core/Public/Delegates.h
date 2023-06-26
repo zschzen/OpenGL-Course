@@ -160,6 +160,8 @@ public:
      */
     void Invoke(Args... args) const
     {
+        if (Actions.empty()) return;
+
         for (const auto& f : Actions)
         {
             if (!f) continue;
