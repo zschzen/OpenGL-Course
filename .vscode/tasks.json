@@ -13,7 +13,8 @@
                 "-g",
                 "-I${workspaceFolder}/dependencies/include",
                 "-L${workspaceFolder}/dependencies/lib",
-                "${workspaceFolder}/*.cpp",
+                "${workspaceFolder}/dependencies/include/imgui/*.cpp",
+                "${workspaceFolder}/main.cpp",
                 "${workspaceFolder}/Core/Private/*.cpp",
                 "${workspaceFolder}/dependencies/lib/*.dylib",
                 "-o",
@@ -30,7 +31,7 @@
                 "CoreFoundation",
                 "-lglfw",
                 "-lGLEW",
-                "-Wno-deprecated"
+                "-Wno-deprecated",
 			],
 			"options": {
 				"cwd": "${workspaceFolder}"

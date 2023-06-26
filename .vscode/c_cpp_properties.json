@@ -4,6 +4,7 @@
           "name": "Mac",
           "includePath": [
               "${workspaceFolder}/**",
+              "${workspaceFolder}/dependencies/include",
               "${workspaceFolder}/Core/Public"
           ],
           "defines": [],
