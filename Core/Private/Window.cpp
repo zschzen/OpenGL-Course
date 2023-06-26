@@ -6,10 +6,17 @@ Window::Window()
 	height = 600;
 	aspectRatio = (GLfloat)width / (GLfloat)height;
 
+	// Set all keys to false
 	for (auto &key : keys)
 	{
 		key = false;
 	}
+
+	// Set mouse position to 0
+	lastX = 0;
+	lastY = 0;
+	xChange = 0;
+	yChange = 0;
 }
 
 Window::Window(GLint windowWidth, GLint windowHeight)
@@ -54,6 +61,12 @@ int Window::Initialize()
 	// Set the current context
 	glfwMakeContextCurrent(mainWindow);
 
+	// Handle key and mouse input
+	createCallbacks();
+
+	// Lock the cursor to the window
+	//glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	// Allow modern extension access
 	glewExperimental = GL_TRUE;
 
@@ -76,10 +89,16 @@ int Window::Initialize()
 	// Set the window to the current object
 	glfwSetWindowUserPointer(mainWindow, this);
 
+	return 0;
+}
+
+void Window::createCallbacks()
+{
 	// Handle key presses and releases
 	glfwSetKeyCallback(mainWindow, handleKeys);
 
-	return 0;
+	// Handle mouse movement
+	glfwSetCursorPosCallback(mainWindow, handleMouse);
 }
 
 void Window::handleKeys(GLFWwindow *window, int key, int code, int action, int mode)
@@ -99,6 +118,40 @@ void Window::handleKeys(GLFWwindow *window, int key, int code, int action, int m
 
 	// Set the key to true if pressed, false if released
 	theWindow->keys[key] = action != GLFW_RELEASE;
+
+	// Call the key callback
+	theWindow->keyCallback(key, code, action, mode);
+
+	// Debug pressed keys
+	//printf("Key: %d, Action: %d, Mode: %d\n", key, action, mode);
+}
+
+void Window::handleMouse(GLFWwindow* window, double xPos, double yPos)
+{
+	// Get the window
+	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
+
+	// Check if this is the first time the mouse has moved
+	if (theWindow->mouseFirstMoved)
+	{
+		theWindow->lastX = xPos;
+		theWindow->lastY = yPos;
+		theWindow->mouseFirstMoved = false;
+	}
+
+	// Calculate the change in mouse position
+	theWindow->xChange = xPos - theWindow->lastX;
+	theWindow->yChange = theWindow->lastY - yPos;
+
+	// Set the last position to the current position
+	theWindow->lastX = xPos;
+	theWindow->lastY = yPos;
+
+	// Call the mouse callback
+	theWindow->mouseCallback(xPos, yPos);
+
+	// Debug mouse position
+	//printf("x: %.6f, y: %.6f\n", theWindow->xChange, theWindow->yChange);
 }
 
 Window::~Window()
