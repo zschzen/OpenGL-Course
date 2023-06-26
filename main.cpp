@@ -21,18 +21,19 @@
 #include "Core/Public/Mesh.h"
 #include "Core/Public/Shader.h"
 #include "Core/Public/Delegates.h"
-
+#include "Core/Public/Camera.h" 
 #include "Core/Public/Shapes.h"
 
 // Scene rendering
 Window mainWindow;
 std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
+Camera camera;
 
 // Rendering matrices and uniforms
 glm::mat4 projection = glm::mat4(1.0f);
 glm::mat4 model = glm::mat4(1.0f);
-GLuint uniformProjection = 0, uniformModel = 0;
+GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0;
 
 // Frame rate
 int MAX_FPS = 60;
@@ -79,9 +80,13 @@ void RenderScene()
     shaderList[0].UseShader();
     uniformModel = shaderList[0].GetModelLocation();
     uniformProjection = shaderList[0].GetProjectionLocation();
+	uniformView = shaderList[0].GetViewLocation();
 
     // Update the projection matrix
     glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+
+	// Update the view matrix
+	glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
 
     // Render the scene
 	for (const auto& mesh : meshList)
@@ -119,6 +124,9 @@ int main()
     CreateObjects();
     CreateShaders();
 
+	// Create the camera
+	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 0.1f);
+
     // Create the projection matrix
     projection = glm::perspective(glm::radians(45.0f), mainWindow.getAspectRatio(), 0.1f, 100.0f);
 
@@ -142,8 +150,7 @@ int main()
         {
             // Sleep to limit the frame rate
             double sleepTime = (desiredFrameTime - deltaTime) * 1000;
-            if (sleepTime <= 0.0f)
-                continue;
+            if (sleepTime <= 0.0f) continue;
 
             // Sleep for the remaining time
             std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(sleepTime)));
@@ -157,6 +164,11 @@ int main()
         // Get + Handle User Input
         glfwPollEvents();
 
+		// Update the camera
+		camera.keyControl(mainWindow.getKeys(), deltaTime);
+		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange()); 
+
+		// Clear the window
         ClearScreen();
 
         // Start the ImGui frame
@@ -174,7 +186,7 @@ int main()
         char buffer[32];
         sprintf(buffer, "FPS: %.2f (%.2fms)", 1.0f / deltaTime, deltaTime * 1000.0f);
 
-        ImGui::PlotLines(buffer, fps_values, IM_ARRAYSIZE(fps_values), fps_values_offset, NULL, 0.0f, 100.0f, ImVec2(0, 80));
+        ImGui::PlotLines(buffer, fps_values, IM_ARRAYSIZE(fps_values), fps_values_offset, NULL, 0.0f, 100.0f, ImVec2(0, 120));
 
         // Set new fps
         ImGui::SliderInt("Max FPS", &MAX_FPS, 1, 144);

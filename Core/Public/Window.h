@@ -18,12 +18,15 @@ public:
     int Initialize();
 
     // Getters
-    inline GLint getBufferWidth() { return bufferWidth; }
-    inline GLint getBufferHeight() { return bufferHeight; }
-    inline GLfloat getAspectRatio() { return aspectRatio; }
-    inline bool getShouldClose() { return glfwWindowShouldClose(mainWindow); }
-    inline GLFWwindow* getWindow() { return mainWindow; }
+    inline GLint getBufferWidth() const { return bufferWidth; }
+    inline GLint getBufferHeight() const { return bufferHeight; }
+    inline GLfloat getAspectRatio() const { return aspectRatio; }
+    inline bool getShouldClose() const { return glfwWindowShouldClose(mainWindow); }
+    inline GLFWwindow* getWindow() const { return mainWindow; }
+
     inline bool* getKeys() { return keys; }
+    GLfloat getXChange();
+    GLfloat getYChange();
 
     // Setters
     inline void setShouldClose(bool shouldClose) { glfwSetWindowShouldClose(mainWindow, shouldClose ? GL_TRUE : GL_FALSE); }
@@ -43,7 +46,7 @@ private:
 
     GLint width = 0;
     GLint height = 0;
-    GLint bufferWidth, bufferHeight = 0;
+    GLint bufferWidth = 0, bufferHeight = 0;
     GLfloat aspectRatio = 0;
 
     // Keys and mouse
@@ -62,6 +65,7 @@ private:
     * @param key: The keyboard key that was pressed or released.
     * @param code: The system-specific scancode of the key.
     * @param action: GLFW_PRESS, GLFW_RELEASE or GLFW_REPEAT.
+    * @param mode: Bit field describing which modifier keys were held down.
     */
     static void handleKeys(GLFWwindow* window, int key, int code, int action, int mode);
 
