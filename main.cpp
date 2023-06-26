@@ -84,8 +84,8 @@ void RenderScene()
     glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 
     // Render the scene
-    for (size_t i = 0; i < meshList.size(); ++i)
-    {
+	for (const auto& mesh : meshList)
+	{
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, -0.5f, -5.0f));
         model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
@@ -95,7 +95,7 @@ void RenderScene()
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        meshList[i]->RenderMesh();
+        mesh->RenderMesh();
     }
 
     // Unbind the shader
