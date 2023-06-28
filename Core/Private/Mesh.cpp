@@ -4,74 +4,84 @@
 
 Mesh::Mesh() {}
 
-Mesh::Mesh(MeshData meshData)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
 {
-    UpdateMesh(meshData.vertices.data(), meshData.indices.data(), 
-               static_cast<unsigned int>(meshData.vertices.size()), 
-               static_cast<unsigned int>(meshData.indices.size()));
+    Update(vertices, indices, textures);
 }
 
-Mesh::Mesh(GLfloat* vertices, unsigned int* indices, unsigned int numOfVertices, unsigned int numOfIndices)
+void Mesh::Update(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
 {
-    UpdateMesh(vertices, indices, numOfVertices, numOfIndices);
-}
-
-void Mesh::UpdateMesh(GLfloat* vertices, unsigned int* indices, unsigned int numOfVertices, unsigned int numOfIndices)
-{
-    subMeshes.clear();
-
-    SubMesh subMesh;
-    subMesh.Data.vertices.insert(subMesh.Data.vertices.end(), vertices, vertices + (numOfVertices * 3));
-    subMesh.Data.indices.insert(subMesh.Data.indices.end(), indices, indices + numOfIndices);
-    subMesh.indexCount = numOfIndices;
+    SubMesh subMesh = SubMesh(vertices, indices, textures);
 
     glGenVertexArrays(1, &subMesh.VAO);
     glBindVertexArray(subMesh.VAO);
 
     glGenBuffers(1, &subMesh.IBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, subMesh.IBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * numOfIndices, indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
     glGenBuffers(1, &subMesh.VBO);
     glBindBuffer(GL_ARRAY_BUFFER, subMesh.VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * numOfVertices, vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertices[0]) * 3, 0);
+    // Position
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+
+    // Normal
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+
+    // Texture coordinates
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     glBindVertexArray(0);
 
-    subMeshes.push_back(subMesh);
+    meshFilter = subMesh;
 }
 
-void Mesh::RenderMesh()
+void Mesh::Draw()
 {
-    for (auto& subMesh : subMeshes)
-    {
-        glBindVertexArray(subMesh.VAO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, subMesh.IBO);
-        glDrawElements(GL_TRIANGLES, subMesh.indexCount, GL_UNSIGNED_INT, 0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
-    }
+    glBindVertexArray(meshFilter.VAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshFilter.IBO);
+
+    glDrawElements(GL_TRIANGLES, meshFilter.indices.size(), GL_UNSIGNED_INT, 0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
-void Mesh::ClearMesh()
+void Mesh::Clear()
 {
-    for (auto& subMesh : subMeshes)
+    if (meshFilter.IBO != 0)
     {
-        glDeleteBuffers(1, &subMesh.IBO);
-        glDeleteBuffers(1, &subMesh.VBO);
-        glDeleteVertexArrays(1, &subMesh.VAO);
+        glDeleteBuffers(1, &meshFilter.IBO);
+        meshFilter.IBO = 0;
     }
 
-    subMeshes.clear();
+    if (meshFilter.VBO != 0)
+    {
+        glDeleteBuffers(1, &meshFilter.VBO);
+        meshFilter.VBO = 0;
+    }
+
+    if (meshFilter.VAO != 0)
+    {
+        glDeleteVertexArrays(1, &meshFilter.VAO);
+        meshFilter.VAO = 0;
+    }
+
+    meshFilter.indices.clear();
+    meshFilter.vertices.clear();
+    meshFilter.textures.clear();
+    meshFilter = SubMesh();
 }
 
 Mesh::~Mesh()
 {
-    ClearMesh();
+    Clear();
 }

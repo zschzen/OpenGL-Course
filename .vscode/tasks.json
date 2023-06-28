@@ -6,7 +6,7 @@
 			"label": "Build",
 			"command": "/usr/bin/clang++",
 			"args": [
-                "-std=c++17",
+                "-std=c++2a",
                 "-fdiagnostics-color=always",
                 "-Wall",
                 "-fansi-escape-codes",

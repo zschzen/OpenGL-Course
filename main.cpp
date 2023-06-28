@@ -1,3 +1,5 @@
+#define STB_IMAGE_IMPLEMENTATION
+
 #include <stdio.h>
 #include <string.h>
 #include <cmath>
@@ -17,16 +19,14 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 #include "Core/Public/Window.h"
-#include "Core/Public/ModelLoader.h"
-#include "Core/Public/Mesh.h"
 #include "Core/Public/Shader.h"
 #include "Core/Public/Delegates.h"
-#include "Core/Public/Camera.h" 
-#include "Core/Public/Shapes.h"
+#include "Core/Public/Camera.h"
+#include "Core/Public/Model.h"
 
 // Scene rendering
 Window mainWindow;
-std::vector<Mesh*> meshList;
+std::vector<Model*> modelList;
 std::vector<Shader> shaderList;
 Camera camera;
 
@@ -48,16 +48,12 @@ static const char* vShader = "./Shaders/shader.vert";
 static const char* fShader = "./Shaders/shader.frag";
 
 // Model path
-static const char* modelPath = "./Models/pyramid.obj";
+static const char* modelPath = "./Models/pyramid/pyramid.obj";
 
 void CreateObjects()
 {
-    // Load model
-    MeshData modelData = ModelLoader::LoadModel(modelPath);
-
-    // Create mesh
-    Mesh* mesh1 = new Mesh(modelData);
-    meshList.push_back(mesh1);
+    Model* model1 = new Model(modelPath);
+    modelList.push_back(model1);
 }
 
 void CreateShaders()
@@ -89,7 +85,7 @@ void RenderScene()
 	glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
 
     // Render the scene
-	for (const auto& mesh : meshList)
+	for (const auto& mesh : modelList)
 	{
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, -0.5f, -5.0f));
@@ -100,7 +96,7 @@ void RenderScene()
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        mesh->RenderMesh();
+        mesh->Render();
     }
 
     // Unbind the shader

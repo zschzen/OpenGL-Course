@@ -10,20 +10,21 @@
 #include <assimp/postprocess.h>
 
 #include "MeshData.h"
+#include "Texture.h"
 
 class Mesh
 {
 public:
     Mesh();
-    Mesh(MeshData meshData);
-    Mesh(GLfloat *vertices, unsigned int *indices, unsigned int numOfVertices, unsigned int numOfIndices);
+    Mesh(SubMesh subMesh);
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 
-    void UpdateMesh(GLfloat *vertices, unsigned int *indices, unsigned int numOfVertices, unsigned int numOfIndices);
-    void RenderMesh();
-    void ClearMesh();
+    void Update(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+    void Draw();
+    void Clear();
 
     ~Mesh();
 
 protected:
-    std::vector<SubMesh> subMeshes = std::vector<SubMesh>();
+    SubMesh meshFilter = SubMesh();
 };

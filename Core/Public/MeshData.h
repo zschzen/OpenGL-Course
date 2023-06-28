@@ -1,16 +1,32 @@
 #pragma once
 
 #include <GL/glew.h>
+#include <glm/glm.hpp>
 
-struct MeshData
+#include "Texture.h"
+
+struct Vertex
 {
-    std::vector<GLfloat> vertices;
-    std::vector<unsigned int> indices;
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 texCoords;
 };
 
 struct SubMesh
 {
-    MeshData Data;
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+    std::vector<Texture> textures;
+
     GLuint VAO, VBO, IBO;
-    GLsizei indexCount;
+
+    // Constructor
+    SubMesh() {}
+
+    SubMesh(std::vector<Vertex> verts, std::vector<unsigned int> inds, std::vector<Texture> texs)
+    {
+        vertices = verts;
+        indices = inds;
+        textures = texs;
+    }
 };
