@@ -3,9 +3,6 @@
 Shader::Shader()
 {
     shaderID = 0;
-    uniformModel = 0;
-    uniformProjection = 0;
-    uniformView = 0;
 }
 
 void Shader::CreateFromString(const char* vertexCode, const char* fragmentCode)
@@ -79,27 +76,38 @@ void Shader::CompileShader(const char* vertexCode, const char* fragmentCode)
         printf("Error validating program: '%s'\n", eLog);
         //return;
     }
-
-    uniformModel = glGetUniformLocation(shaderID, "model");
-    uniformProjection = glGetUniformLocation(shaderID, "projection");
-    uniformView = glGetUniformLocation(shaderID, "view");
 }
 
-void Shader::UseShader()
+void Shader::SetInt(const char* name, int value)
+{
+    glUniform1i(glGetUniformLocation(shaderID, name), value);
+}
+
+void Shader::SetFloat(const char* name, float value)
+{
+    glUniform1f(glGetUniformLocation(shaderID, name), value);
+}
+
+void Shader::SetVec3(const char* name, glm::vec3 value)
+{
+    glUniform3fv(glGetUniformLocation(shaderID, name), 1, glm::value_ptr(value));
+}
+
+void Shader::SetMat4(const char* name, glm::mat4 value)
+{
+    glUniformMatrix4fv(glGetUniformLocation(shaderID, name), 1, GL_FALSE, glm::value_ptr(value));
+}
+
+void Shader::Use()
 {
 	glUseProgram(shaderID);
 }
 
-void Shader::ClearShader()
+void Shader::Clear()
 {
-	if (shaderID != 0)
-	{
-		glDeleteProgram(shaderID);
-		shaderID = 0;
-	}
-
-	uniformModel = 0;
-	uniformProjection = 0;
+    if (shaderID == 0) return;
+    glDeleteProgram(shaderID);
+    shaderID = 0;
 }
 
 
@@ -141,5 +149,5 @@ std::string Shader::GetAbsolutePath(const char* fileLocation)
 
 Shader::~Shader()
 {
-	ClearShader();
+	Clear();
 }

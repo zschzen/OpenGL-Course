@@ -14,11 +14,11 @@ Model::~Model()
     Clear();
 }
 
-void Model::Render()
+void Model::Render(Shader& shader)
 {
     for (auto& mesh : meshes)
     {
-        mesh->Draw();
+        mesh->Draw(shader);
     }
 }
 
@@ -33,7 +33,7 @@ void Model::Clear()
 void Model::LoadModel(const std::string& fileName)
 {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(fileName, aiProcessPreset_TargetRealtime_MaxQuality);
+    const aiScene* scene = importer.ReadFile(fileName, aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_FlipUVs);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -44,6 +44,8 @@ void Model::LoadModel(const std::string& fileName)
     directory = fileName.substr(0, fileName.find_last_of('/'));
 
     ProcessNode(scene->mRootNode, scene);
+
+    texturesLoaded.clear();
 }
 
 void Model::ProcessNode(aiNode* node, const aiScene* scene)

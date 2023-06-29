@@ -1,6 +1,7 @@
 #include "../Public/Mesh.h"
 
 #include "../Public/MeshData.h"
+#include "../Public/Shader.h"
 
 Mesh::Mesh() {}
 
@@ -26,15 +27,15 @@ void Mesh::Update(std::vector<Vertex> vertices, std::vector<unsigned int> indice
 
     // Position
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, position));
 
     // Normal
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, normal));
 
     // Texture coordinates
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, texCoords));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -44,13 +45,35 @@ void Mesh::Update(std::vector<Vertex> vertices, std::vector<unsigned int> indice
     meshFilter = subMesh;
 }
 
-void Mesh::Draw()
+void Mesh::Draw(Shader& shader)
 {
+    unsigned int diffuseNr = 1;
+    unsigned int specularNr = 1;
+
+    for (unsigned int i = 0; i < meshFilter.textures.size(); i++)
+    {
+        glActiveTexture(GL_TEXTURE0 + i);
+
+        std::string number;
+        std::string name = meshFilter.textures[i].type;
+
+        number = (name == "texture_diffuse")
+                     ? std::to_string(diffuseNr++)
+                     : std::to_string(specularNr++);
+
+        shader.SetInt((name + number).c_str(), i);
+        glBindTexture(GL_TEXTURE_2D, meshFilter.textures[i].id);
+    }
+    glActiveTexture(GL_TEXTURE0);
+
+    // Draw mesh
     glBindVertexArray(meshFilter.VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshFilter.IBO);
 
+    // Draw the triangles
     glDrawElements(GL_TRIANGLES, meshFilter.indices.size(), GL_UNSIGNED_INT, 0);
 
+    // Unbind
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }

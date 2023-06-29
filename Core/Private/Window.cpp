@@ -70,6 +70,7 @@ int Window::Initialize()
 	// Enable depth
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_MULTISAMPLE);
+	glEnable(GL_CULL_FACE);
 
 	// Create Viewport
 	glViewport(0, 0, bufferWidth, bufferHeight);

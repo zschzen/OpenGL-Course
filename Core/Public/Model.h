@@ -18,6 +18,9 @@ struct Vertex;
 #include "Mesh.h"
 #include "Texture.h"
 
+// Forward declaration
+class Shader;
+
 class Model
 {
 public:
@@ -25,7 +28,7 @@ public:
     Model(const char* path);
     ~Model();
 
-    void Render();
+    void Render(Shader& shader);
     void Clear();
 
 private:
