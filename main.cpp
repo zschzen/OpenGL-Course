@@ -27,7 +27,7 @@
 
 // Scene rendering
 Window mainWindow;
-std::vector<Model*> modelList;
+std::vector<Model *> modelList;
 std::vector<Shader> shaderList;
 Camera camera;
 Light mainLight;
@@ -35,32 +35,30 @@ Light mainLight;
 // Rendering matrices and uniforms
 glm::mat4 projection = glm::mat4(1.0f);
 glm::mat4 model = glm::mat4(1.0f);
-GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0;
 
 // Frame rate
-int MAX_FPS = 60;
+int MAX_FPS = 30;
 double deltaTime = 0.0f;
-
 // Sample fps counter
-static float fps_values[180] = { 0 };
+static float fps_values[180] = {0};
 static int fps_values_offset = 0;
 
 // Shader paths
-static const char* vShader = "./Shaders/shader.vert";
-static const char* fShader = "./Shaders/shader.frag";
+static const char *vShader = "./Shaders/shader.vert";
+static const char *fShader = "./Shaders/shader.frag";
 
 // Model path
-static const char* modelPath = "./Models/flower/flower.obj";
+static const char *modelPath = "./Models/flower/flower.obj";
 
 void CreateObjects()
 {
-    Model* model1 = new Model(modelPath);
+    Model *model1 = new Model(modelPath);
     modelList.push_back(model1);
 }
 
 void CreateShaders()
 {
-    Shader* shader1 = new Shader();
+    Shader *shader1 = new Shader();
     shader1->CreateFromFiles(vShader, fShader);
     shaderList.push_back(*shader1);
 }
@@ -68,16 +66,15 @@ void CreateShaders()
 void ClearScreen()
 {
     // Clear the window
-    //glClearColor(0.16f, 0.16f, 0.21f, 1.0f);
-    glClearColor(0.97f, 0.63f, 1.0f, 1.0f);
+    glClearColor(1.0f, 0.97f, 0.83f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void RenderScene()
-{ 
+{
     // Render the scene
-	for (int i = 0; i < modelList.size(); i++)
-	{
+    for (int i = 0; i < modelList.size(); i++)
+    {
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, -1.5f, -5.0f));
         model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
@@ -91,7 +88,10 @@ void RenderScene()
         shaderList[i].SetMat4("model", model);
 
         // Update the light
-        mainLight.Use(shaderList[i].GetUniformLocation("directionalLight.ambientIntensity"), shaderList[i].GetUniformLocation("directionalLight.colour"));
+        mainLight.Use(shaderList[i].GetUniformLocation("directionalLight.ambientIntensity"),
+                      shaderList[i].GetUniformLocation("directionalLight.colour"),
+                      shaderList[i].GetUniformLocation("directionalLight.diffuseIntensity"),
+                      shaderList[i].GetUniformLocation("directionalLight.direction"));
 
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         modelList[i]->Render(shaderList[i]);
@@ -118,11 +118,11 @@ int main()
     CreateObjects();
     CreateShaders();
 
-	// Create the camera
-	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 0.1f);
+    // Create the camera
+    camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 0.1f);
 
     // Create the light
-    mainLight = Light(1.0f, 1.0f, 1.0f, 1.0f);
+    mainLight = Light();
 
     // Create the projection matrix
     projection = glm::perspective(glm::radians(45.0f), mainWindow.getAspectRatio(), 0.1f, 100.0f);
@@ -130,7 +130,7 @@ int main()
     // Setup ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
     (void)io;
     ImGui_ImplGlfw_InitForOpenGL(mainWindow.getWindow(), true);
     ImGui_ImplOpenGL3_Init("#version 330");
@@ -147,7 +147,8 @@ int main()
         {
             // Sleep to limit the frame rate
             double sleepTime = (desiredFrameTime - deltaTime) * 1000;
-            if (sleepTime <= 0.0f) continue;
+            if (sleepTime <= 0.0f)
+                continue;
 
             // Sleep for the remaining time
             std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(sleepTime)));
@@ -161,11 +162,11 @@ int main()
         // Get + Handle User Input
         glfwPollEvents();
 
-		// Update the camera
-		camera.keyControl(mainWindow.getKeys(), deltaTime);
-		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange()); 
+        // Update the camera
+        camera.keyControl(mainWindow.getKeys(), deltaTime);
+        camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 
-		// Clear the window
+        // Clear the window
         ClearScreen();
 
         // Start the ImGui frame
@@ -178,7 +179,7 @@ int main()
 
         ImGui::SetNextWindowSize(ImVec2(0,0));
         ImGui::SetNextWindowPos(ImVec2(0,0));
-        ImGui::Begin("Performance", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar);
+        ImGui::Begin("Settings", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar);
         fps_values[fps_values_offset] = 1.0f / deltaTime;
         fps_values_offset = (fps_values_offset + 1) % IM_ARRAYSIZE(fps_values);
         // FPS: 60.00 (1.00ms)
@@ -192,9 +193,14 @@ int main()
         desiredFrameTime = 1.0 / MAX_FPS;
 
         // set new light color and intensity
-        ImGui::ColorEdit3("Light Color", (float*)&mainLight.color);
+        ImGui::ColorEdit3("Light Color", (float *)&mainLight.color);
         ImGui::SliderFloat("Light Ambient Intensity", &mainLight.ambientIntensity, 0.0f, 1.0f);
 
+        // Set new light direction and intensity
+        ImGui::SliderFloat("Light Diffuse Intensity", &mainLight.diffuseIntensity, 0.0f, 1.0f);
+        ImGui::SliderFloat("Light X Direction", &mainLight.direction.x, -1.0f, 1.0f);
+        ImGui::SliderFloat("Light Y Direction", &mainLight.direction.y, -1.0f, 1.0f);
+        ImGui::SliderFloat("Light Z Direction", &mainLight.direction.z, -1.0f, 1.0f);
 
         ImGui::End();
 

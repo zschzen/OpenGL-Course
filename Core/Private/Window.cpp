@@ -115,19 +115,19 @@ GLfloat Window::getYChange()
 void Window::handleKeys(GLFWwindow *window, int key, int code, int action, int mode)
 {
 	// Get the window
-	Window *theWindow = static_cast<Window *>(glfwGetWindowUserPointer(window));
+	Window *windowRef = static_cast<Window *>(glfwGetWindowUserPointer(window));
 
 	// Close the window if the escape key is pressed
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 	{
-		theWindow->setShouldClose(true);
+		windowRef->setShouldClose(true);
 		return;
 	}
 
 	// Set mouse enabled if the tab key is pressed
-	if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
+	if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
 	{
-		theWindow->setMouseEnabled(!theWindow->mouseEnabled);
+		windowRef->setMouseEnabled(!windowRef->mouseEnabled);
 		return;
 	}
 
@@ -135,10 +135,10 @@ void Window::handleKeys(GLFWwindow *window, int key, int code, int action, int m
 	if (key < 0 || key >= 1024) return;
 
 	// Set the key to true if pressed, false if released
-	theWindow->keys[key] = action != GLFW_RELEASE;
+	windowRef->keys[key] = action != GLFW_RELEASE;
 
 	// Call the key callback
-	//theWindow->keyCallback(key, code, action, mode);
+	windowRef->keyCallback(key, code, action, mode);
 
 	// Debug pressed keys
 	//printf("Key: %d, Action: %d, Mode: %d\n", key, action, mode);
@@ -147,35 +147,35 @@ void Window::handleKeys(GLFWwindow *window, int key, int code, int action, int m
 void Window::handleMouse(GLFWwindow* window, double xPos, double yPos)
 {
 	// Get the window
-	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	Window* windowRef = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
-	if (!theWindow->mouseEnabled)
+	if (!windowRef->mouseEnabled)
 	{
-		theWindow->mouseFirstMoved = true;
+		windowRef->mouseFirstMoved = true;
 		return;
 	}
 
 	// Check if this is the first time the mouse has moved
-	if (theWindow->mouseFirstMoved)
+	if (windowRef->mouseFirstMoved)
 	{
-		theWindow->lastX = xPos;
-		theWindow->lastY = yPos;
-		theWindow->mouseFirstMoved = false;
+		windowRef->lastX = xPos;
+		windowRef->lastY = yPos;
+		windowRef->mouseFirstMoved = false;
 	}
 
 	// Calculate the change in mouse position
-	theWindow->xChange = xPos - theWindow->lastX;
-	theWindow->yChange = theWindow->lastY - yPos;
+	windowRef->xChange = xPos - windowRef->lastX;
+	windowRef->yChange = windowRef->lastY - yPos;
 
 	// Set the last position to the current position
-	theWindow->lastX = xPos;
-	theWindow->lastY = yPos;
+	windowRef->lastX = xPos;
+	windowRef->lastY = yPos;
 
 	// Call the mouse callback
-	//theWindow->mouseCallback(xPos, yPos);
+	windowRef->mouseCallback(xPos, yPos);
 
 	// Debug mouse position
-	//printf("x: %.6f, y: %.6f\n", theWindow->xChange, theWindow->yChange);
+	//printf("x: %.6f, y: %.6f\n", windowRef->xChange, windowRef->yChange);
 }
 
 Window::~Window()

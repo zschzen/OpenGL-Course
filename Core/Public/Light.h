@@ -10,15 +10,19 @@ class Light
 {
 public:
     Light();
-    Light(GLfloat red, GLfloat green, GLfloat blue, GLfloat aIntensity);
+    Light(GLfloat red, GLfloat green, GLfloat blue, GLfloat aIntensity,
+          GLfloat xDir, GLfloat yDir, GLfloat zDir, GLfloat dIntensity);
 
-    void Use(GLuint ambientIntensityLocation, GLuint colorLocation);
+    void Use(GLuint ambientIntensityLocation, GLuint ambientColorLocation,
+             GLuint diffuseIntensityLocation, GLuint diffuseDirectionLocation);
 
     ~Light();
 
     glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
     GLfloat ambientIntensity = 1.0f;
 
+    glm::vec3 direction = glm::vec3(0.0f, -1.0f, 0.0f);
+    GLfloat diffuseIntensity = 1.0f;
 };
 
 #endif // !__LIGHT_H__
