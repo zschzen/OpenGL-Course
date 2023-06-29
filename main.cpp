@@ -48,7 +48,7 @@ static const char* vShader = "./Shaders/shader.vert";
 static const char* fShader = "./Shaders/shader.frag";
 
 // Model path
-static const char* modelPath = "./Models/pyramid/pyramid.obj";
+static const char* modelPath = "./Models/flower/flower.obj";
 
 void CreateObjects()
 {
@@ -66,37 +66,30 @@ void CreateShaders()
 void ClearScreen()
 {
     // Clear the window
-    glClearColor(0.16f, 0.16f, 0.21f, 1.0f);
+    //glClearColor(0.16f, 0.16f, 0.21f, 1.0f);
+    glClearColor(0.97f, 0.63f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void RenderScene()
 {
-    // Update the shader
-    shaderList[0].UseShader();
-    uniformModel = shaderList[0].GetModelLocation();
-    uniformProjection = shaderList[0].GetProjectionLocation();
-	uniformView = shaderList[0].GetViewLocation();
-
-    // Update the projection matrix
-    glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
-
-	// Update the view matrix
-	glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
-
     // Render the scene
-	for (const auto& mesh : modelList)
+	for (int i = 0; i < modelList.size(); i++)
 	{
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -0.5f, -5.0f));
-        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
-        model = glm::rotate(model, glm::radians(45.0f) * (GLfloat)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::translate(model, glm::vec3(0.0f, -1.5f, -5.0f));
+        model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+        model = glm::rotate(model, -glm::radians(125.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        shaderList[i].Use();
 
         // Update the model matrix
-        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        shaderList[i].SetMat4("projection", projection);
+        shaderList[i].SetMat4("view", camera.calculateViewMatrix());
+        shaderList[i].SetMat4("model", model);
 
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        mesh->Render();
+        modelList[i]->Render(shaderList[i]);
     }
 
     // Unbind the shader
@@ -175,7 +168,7 @@ int main()
         // Update the window
         RenderScene();
 
-        ImGui::Begin("Performance");
+        ImGui::Begin("Performance", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar);
         fps_values[fps_values_offset] = 1.0f / deltaTime;
         fps_values_offset = (fps_values_offset + 1) % IM_ARRAYSIZE(fps_values);
         // FPS: 60.00 (1.00ms)
