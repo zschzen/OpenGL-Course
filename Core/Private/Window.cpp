@@ -5,18 +5,6 @@ Window::Window()
 	width = 800;
 	height = 600;
 	aspectRatio = (GLfloat)width / (GLfloat)height;
-
-	// Set all keys to false
-	for (auto &key : keys)
-	{
-		key = false;
-	}
-
-	// Set mouse position to 0
-	lastX = 0;
-	lastY = 0;
-	xChange = 0;
-	yChange = 0;
 }
 
 Window::Window(GLint windowWidth, GLint windowHeight)
