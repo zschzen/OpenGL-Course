@@ -149,6 +149,12 @@ void Window::handleMouse(GLFWwindow* window, double xPos, double yPos)
 	// Get the window
 	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
+	if (!theWindow->mouseEnabled)
+	{
+		theWindow->mouseFirstMoved = true;
+		return;
+	}
+
 	// Check if this is the first time the mouse has moved
 	if (theWindow->mouseFirstMoved)
 	{
