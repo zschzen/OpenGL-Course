@@ -32,6 +32,8 @@ public:
     inline void setShouldClose(bool shouldClose) { glfwSetWindowShouldClose(mainWindow, shouldClose ? GL_TRUE : GL_FALSE); }
     inline void setWindowLabel(const char* label) { glfwSetWindowTitle(mainWindow, label); }
 
+    void setMouseEnabled(bool enabled);
+
     // Other
     inline void swapBuffers() { glfwSwapBuffers(mainWindow); }
 
@@ -55,6 +57,7 @@ private:
     GLfloat lastX = 0, lastY = 0;
     GLfloat xChange = 0, yChange = 0;
     bool mouseFirstMoved = true;
+    bool mouseEnabled = true;
 
     // Callbacks
     void createCallbacks();

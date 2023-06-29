@@ -92,6 +92,14 @@ int Window::Initialize()
 	return 0;
 }
 
+void Window::setMouseEnabled(bool enabled)
+{
+	mouseEnabled = enabled;
+
+	// Lock the cursor to the window
+	glfwSetInputMode(mainWindow, GLFW_CURSOR, enabled ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+}
+
 void Window::createCallbacks()
 {
 	// Handle key presses and releases
@@ -124,6 +132,13 @@ void Window::handleKeys(GLFWwindow *window, int key, int code, int action, int m
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 	{
 		theWindow->setShouldClose(true);
+		return;
+	}
+
+	// Set mouse enabled if the tab key is pressed
+	if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
+	{
+		theWindow->setMouseEnabled(!theWindow->mouseEnabled);
 		return;
 	}
 
