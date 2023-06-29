@@ -33,7 +33,7 @@ void Model::Clear()
 void Model::LoadModel(const std::string& fileName)
 {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(fileName, aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_FlipUVs);
+    const aiScene* scene = importer.ReadFile(fileName, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_FlipUVs);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
