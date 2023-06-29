@@ -52,7 +52,7 @@ private:
     GLfloat aspectRatio = 0;
 
     // Keys and mouse
-    bool keys[1024]{};
+    bool keys[1024]{false};
 
     GLfloat lastX = 0, lastY = 0;
     GLfloat xChange = 0, yChange = 0;
