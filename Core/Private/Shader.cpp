@@ -80,22 +80,22 @@ void Shader::CompileShader(const char* vertexCode, const char* fragmentCode)
 
 void Shader::SetInt(const char* name, int value)
 {
-    glUniform1i(glGetUniformLocation(shaderID, name), value);
+    glUniform1i(GetUniformLocation(name), value);
 }
 
 void Shader::SetFloat(const char* name, float value)
 {
-    glUniform1f(glGetUniformLocation(shaderID, name), value);
+    glUniform1f(GetUniformLocation(name), value);
 }
 
 void Shader::SetVec3(const char* name, glm::vec3 value)
 {
-    glUniform3fv(glGetUniformLocation(shaderID, name), 1, glm::value_ptr(value));
+    glUniform3fv(GetUniformLocation(name), 1, glm::value_ptr(value));
 }
 
 void Shader::SetMat4(const char* name, glm::mat4 value)
 {
-    glUniformMatrix4fv(glGetUniformLocation(shaderID, name), 1, GL_FALSE, glm::value_ptr(value));
+    glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
 }
 
 void Shader::Use()

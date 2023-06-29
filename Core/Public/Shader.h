@@ -25,6 +25,9 @@ public:
     void SetVec3(const char* name, glm::vec3 value);
     void SetMat4(const char* name, glm::mat4 value);
 
+    // Getters
+    inline GLuint GetUniformLocation(const char* name) const { return glGetUniformLocation(shaderID, name); }
+
     void Use();
     void Clear();
 
