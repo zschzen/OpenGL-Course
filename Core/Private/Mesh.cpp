@@ -26,7 +26,7 @@ void Mesh::Update(std::vector<Vertex> vertices, std::vector<unsigned int> indice
 
     // Position
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
 
     // Normal
     glEnableVertexAttribArray(1);
