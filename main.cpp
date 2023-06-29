@@ -23,12 +23,14 @@
 #include "Core/Public/Delegates.h"
 #include "Core/Public/Camera.h"
 #include "Core/Public/Model.h"
+#include "Core/Public/Light.h"
 
 // Scene rendering
 Window mainWindow;
 std::vector<Model*> modelList;
 std::vector<Shader> shaderList;
 Camera camera;
+Light mainLight;
 
 // Rendering matrices and uniforms
 glm::mat4 projection = glm::mat4(1.0f);
@@ -72,7 +74,7 @@ void ClearScreen()
 }
 
 void RenderScene()
-{
+{ 
     // Render the scene
 	for (int i = 0; i < modelList.size(); i++)
 	{
@@ -87,6 +89,9 @@ void RenderScene()
         shaderList[i].SetMat4("projection", projection);
         shaderList[i].SetMat4("view", camera.calculateViewMatrix());
         shaderList[i].SetMat4("model", model);
+
+        // Update the light
+        mainLight.Use(shaderList[i].GetUniformLocation("directionalLight.ambientIntensity"), shaderList[i].GetUniformLocation("directionalLight.colour"));
 
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         modelList[i]->Render(shaderList[i]);
@@ -115,6 +120,9 @@ int main()
 
 	// Create the camera
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 0.1f);
+
+    // Create the light
+    mainLight = Light(1.0f, 1.0f, 1.0f, 1.0f);
 
     // Create the projection matrix
     projection = glm::perspective(glm::radians(45.0f), mainWindow.getAspectRatio(), 0.1f, 100.0f);
@@ -168,6 +176,8 @@ int main()
         // Update the window
         RenderScene();
 
+        ImGui::SetNextWindowSize(ImVec2(0,0));
+        ImGui::SetNextWindowPos(ImVec2(0,0));
         ImGui::Begin("Performance", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar);
         fps_values[fps_values_offset] = 1.0f / deltaTime;
         fps_values_offset = (fps_values_offset + 1) % IM_ARRAYSIZE(fps_values);
@@ -180,6 +190,11 @@ int main()
         // Set new fps
         ImGui::SliderInt("Max FPS", &MAX_FPS, 1, 144);
         desiredFrameTime = 1.0 / MAX_FPS;
+
+        // set new light color and intensity
+        ImGui::ColorEdit3("Light Color", (float*)&mainLight.color);
+        ImGui::SliderFloat("Light Ambient Intensity", &mainLight.ambientIntensity, 0.0f, 1.0f);
+
 
         ImGui::End();
 
