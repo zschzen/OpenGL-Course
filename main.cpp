@@ -24,6 +24,7 @@
 #include "Core/Public/Camera.h"
 #include "Core/Public/Model.h"
 #include "Core/Public/Light.h"
+#include "Core/Public/Material.h"
 
 // Scene rendering
 Window mainWindow;
@@ -31,6 +32,7 @@ std::vector<Model *> modelList;
 std::vector<Shader> shaderList;
 Camera camera;
 Light mainLight;
+Material shinyMaterial;
 
 // Rendering matrices and uniforms
 glm::mat4 projection = glm::mat4(1.0f);
@@ -66,7 +68,7 @@ void CreateShaders()
 void ClearScreen()
 {
     // Clear the window
-    glClearColor(1.0f, 0.97f, 0.83f, 1.0f);
+    glClearColor(.95f, 0.65f, 0.95f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -86,12 +88,16 @@ void RenderScene()
         shaderList[i].SetMat4("projection", projection);
         shaderList[i].SetMat4("view", camera.calculateViewMatrix());
         shaderList[i].SetMat4("model", model);
+        shaderList[i].SetVec3("eyePos", camera.getCameraPosition());
 
         // Update the light
         mainLight.Use(shaderList[i].GetUniformLocation("directionalLight.ambientIntensity"),
                       shaderList[i].GetUniformLocation("directionalLight.colour"),
                       shaderList[i].GetUniformLocation("directionalLight.diffuseIntensity"),
                       shaderList[i].GetUniformLocation("directionalLight.direction"));
+
+        shinyMaterial.Use(shaderList[i].GetUniformLocation("material.specularIntensity"),
+                          shaderList[i].GetUniformLocation("material.shininess"));
 
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         modelList[i]->Render(shaderList[i]);
@@ -123,6 +129,9 @@ int main()
 
     // Create the light
     mainLight = Light();
+
+    // Create the material
+    shinyMaterial = Material(1.0f, 32); 
 
     // Create the projection matrix
     projection = glm::perspective(glm::radians(45.0f), mainWindow.getAspectRatio(), 0.1f, 100.0f);
@@ -179,7 +188,7 @@ int main()
 
         ImGui::SetNextWindowSize(ImVec2(0,0));
         ImGui::SetNextWindowPos(ImVec2(0,0));
-        ImGui::Begin("Settings", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar);
+        ImGui::Begin("Settings", NULL, ImGuiWindowFlags_NoSavedSettings);
         fps_values[fps_values_offset] = 1.0f / deltaTime;
         fps_values_offset = (fps_values_offset + 1) % IM_ARRAYSIZE(fps_values);
         // FPS: 60.00 (1.00ms)
@@ -192,6 +201,11 @@ int main()
         ImGui::SliderInt("Max FPS", &MAX_FPS, 1, 144);
         desiredFrameTime = 1.0 / MAX_FPS;
 
+        ImGui::End();
+
+        ImGui::SetNextWindowSize(ImVec2(0,0));
+        ImGui::SetNextWindowPos(ImVec2(0,120));
+        ImGui::Begin("Lighting", NULL, ImGuiWindowFlags_NoSavedSettings);
         // set new light color and intensity
         ImGui::ColorEdit3("Light Color", (float *)&mainLight.color);
         ImGui::SliderFloat("Light Ambient Intensity", &mainLight.ambientIntensity, 0.0f, 1.0f);
@@ -201,6 +215,10 @@ int main()
         ImGui::SliderFloat("Light X Direction", &mainLight.direction.x, -1.0f, 1.0f);
         ImGui::SliderFloat("Light Y Direction", &mainLight.direction.y, -1.0f, 1.0f);
         ImGui::SliderFloat("Light Z Direction", &mainLight.direction.z, -1.0f, 1.0f);
+
+        // Set new material specular intensity and shininess
+        ImGui::SliderFloat("Material Specular Intensity", &shinyMaterial.specularIntensity, 0.0f, 1.0f);
+        ImGui::SliderFloat("Material Shininess", &shinyMaterial.shininess, 0.0f, 256.0f);
 
         ImGui::End();
 
