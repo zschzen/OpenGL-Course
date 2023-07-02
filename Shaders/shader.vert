@@ -6,7 +6,8 @@ layout (location = 2) in vec2 tex;
 
 out vec4 vCol;
 out vec2 TexCoord;
-flat out vec3 Normal;
+out vec3 Normal;		// You could add flat here to make it flat shading (flat out vec3 Normal)
+out vec3 FragPos;
 
 uniform mat4 model;
 uniform mat4 projection;
@@ -14,11 +15,14 @@ uniform mat4 view;
 
 void main()
 {
-	gl_Position = projection * view * model * vec4(pos, 1.0);
-	vCol = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);
-	
-	TexCoord = tex;
+	// Transform the vertex position into world space
+	vec4 WorldPos = model * vec4(pos, 1.0f);
 
-	// We need to convert the normal to world space when using a non-uniform scale matrix
-	Normal = mat3(transpose(inverse(model))) * normal;
+	vCol = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);			// Pass the interpolated vertex color to the fragment shader
+	TexCoord = tex;										// Pass the interpolated vertex texture coordinates to the fragment shader
+	Normal = mat3(transpose(inverse(model))) * normal;	// Transpose inverse matrix to transform normals correctly regardless of scale
+	FragPos = WorldPos.xyz;								// Pass the fragment position to the fragment shader
+
+	// Return the transformed and projected vertex value in clip space
+	gl_Position = projection * view * WorldPos;
 }
