@@ -6,9 +6,12 @@ Entity::Entity()
 {
 }
 
-Entity::Entity(std::string name, std::string tag, Model *model)
-    : name(name), tag(tag), model(model)
+Entity::Entity(Model *model)
+    : model(model)
 {
+    name = std::string("New Entity");
+    tag = std::string("Untagged");
+
     aabb = std::make_unique<AABB>(generateAABB(*model));
 }
 
