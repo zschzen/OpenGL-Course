@@ -6,6 +6,8 @@
 #include <vector>
 #include <chrono>
 #include <thread>
+#include <list>
+#include <memory>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -29,8 +31,8 @@
 
 // Scene rendering
 Window mainWindow;
-std::vector<Entity *> modelList;
-std::vector<Shader> shaderList;
+std::vector<std::unique_ptr<Entity>> modelList = std::vector<std::unique_ptr<Entity>>();
+std::vector<Shader> shaderList = std::vector<Shader>();
 Camera camera;
 Light mainLight;
 Material shinyMaterial;
@@ -52,11 +54,18 @@ static const char *modelPath = "./Models/flower/flower.obj";
 void CreateObjects()
 {
     Model *model1 = new Model(modelPath);
-    Entity *entity1 = new Entity("Flower", "Other", model1);
-    entity1->transform.SetLocalPositon(glm::vec3(0.0f, -1.5f, -5.0f));
-    entity1->transform.SetLocalRotation(glm::vec3(0.0f, -glm::radians(125.0f), 0.0f));
-    entity1->transform.SetLocalScale(glm::vec3(0.1f, 0.1f, 0.1f));
-    modelList.push_back(entity1);
+
+    // instantiate 36 entities in a grid
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            Entity *entity = new Entity(model1);
+            entity->transform.SetLocalPositon(glm::vec3(i * 5.0f, 0.0f, j * 5.0f));
+            entity->transform.SetLocalScale(glm::vec3(0.1f, 0.1f, 0.1f));
+            modelList.push_back(std::unique_ptr<Entity>(entity));
+        }
+    }
 }
 
 void CreateShaders()
@@ -78,28 +87,27 @@ void RenderScene()
     unsigned int display = 0;
     unsigned int total = 0;
     // Render the scene
-    for (int i = 0; i < modelList.size(); i++)
+    for (auto &entity : modelList)
     {
-        shaderList[i].Use();
+        shaderList[0].Use();
 
         // Update the model matrix
-        shaderList[i].SetMat4("projection", camera.getProjectionMatrix());
-        shaderList[i].SetMat4("view", camera.calculateViewMatrix());
-        shaderList[i].SetVec3("eyePos", camera.getCameraPosition());
+        shaderList[0].SetMat4("projection", camera.getProjectionMatrix());
+        shaderList[0].SetMat4("view", camera.calculateViewMatrix());
+        shaderList[0].SetVec3("eyePos", camera.getCameraPosition());
 
         // Update the light
-        mainLight.Use(shaderList[i]);
-        shinyMaterial.Use(shaderList[i]);
+        mainLight.Use(shaderList[0]);
+        shinyMaterial.Use(shaderList[0]);
 
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        modelList[i]->DrawSelfAndChildren(camera.getFrustum(), shaderList[i], display, total);
+        entity->DrawSelfAndChildren(camera.getFrustum(), shaderList[0], display, total);
     }
 
     // Render the scene stats
-    ImGui::SetNextWindowPos(ImVec2(mainWindow.getWidth() - 90,0));
+    ImGui::SetNextWindowPos(ImVec2(mainWindow.getWidth() - 175,0));
     ImGui::Begin("Scene Stats", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
-    ImGui::Text("Display: %d", display);
-    ImGui::Text("Total: %d", total);
+    ImGui::Text("Draw calls:\t%d", display);
+    ImGui::Text("Total objects:\t%d", total);
     ImGui::End();
 
     // Unbind the shader
@@ -114,7 +122,8 @@ int main()
 
     mainWindow.keyCallback += [&](int key, int scancode, int action, int mods) {
         if (key == GLFW_KEY_UP && action == GLFW_PRESS)
-            modelList[0]->transform.SetLocalPositon(modelList[0]->transform.GetLocalPosition() + glm::vec3(0.0f, 0.0f, 0.1f));
+            for (auto &entity : modelList)
+                entity->transform.SetLocalPositon(entity->transform.GetLocalPosition() + glm::vec3(0.0f, 0.0f, 1.0f));
     };
 
     // Calculate the desired frame time in seconds
