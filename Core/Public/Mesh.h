@@ -28,6 +28,11 @@ public:
     void Draw(Shader& shader);
     void Clear();
 
+    // Get vertices, indices and textures
+    const std::vector<Vertex>& GetVertices() const { return meshFilter.vertices; }
+    const std::vector<unsigned int>& GetIndices() const { return meshFilter.indices; }
+    const std::vector<Texture>& GetTextures() const { return meshFilter.textures; }
+
     ~Mesh();
 
 protected:

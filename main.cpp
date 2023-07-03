@@ -19,6 +19,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 #include "Core/Public/Window.h"
+#include "Core/Public/Entity.h"
 #include "Core/Public/Shader.h"
 #include "Core/Public/Delegates.h"
 #include "Core/Public/Camera.h"
@@ -28,15 +29,11 @@
 
 // Scene rendering
 Window mainWindow;
-std::vector<Model *> modelList;
+std::vector<Entity *> modelList;
 std::vector<Shader> shaderList;
 Camera camera;
 Light mainLight;
 Material shinyMaterial;
-
-// Rendering matrices and uniforms
-glm::mat4 projection = glm::mat4(1.0f);
-glm::mat4 model = glm::mat4(1.0f);
 
 // Frame rate
 int MAX_FPS = 30;
@@ -55,7 +52,11 @@ static const char *modelPath = "./Models/flower/flower.obj";
 void CreateObjects()
 {
     Model *model1 = new Model(modelPath);
-    modelList.push_back(model1);
+    Entity *entity1 = new Entity("Flower", "Other", model1);
+    entity1->transform.SetLocalPositon(glm::vec3(0.0f, -1.5f, -5.0f));
+    entity1->transform.SetLocalRotation(glm::vec3(0.0f, -glm::radians(125.0f), 0.0f));
+    entity1->transform.SetLocalScale(glm::vec3(0.1f, 0.1f, 0.1f));
+    modelList.push_back(entity1);
 }
 
 void CreateShaders()
@@ -74,20 +75,16 @@ void ClearScreen()
 
 void RenderScene()
 {
+    unsigned int display = 0;
+    unsigned int total = 0;
     // Render the scene
     for (int i = 0; i < modelList.size(); i++)
     {
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -1.5f, -5.0f));
-        model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
-        model = glm::rotate(model, -glm::radians(125.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
         shaderList[i].Use();
 
         // Update the model matrix
-        shaderList[i].SetMat4("projection", projection);
+        shaderList[i].SetMat4("projection", camera.getProjectionMatrix());
         shaderList[i].SetMat4("view", camera.calculateViewMatrix());
-        shaderList[i].SetMat4("model", model);
         shaderList[i].SetVec3("eyePos", camera.getCameraPosition());
 
         // Update the light
@@ -95,8 +92,15 @@ void RenderScene()
         shinyMaterial.Use(shaderList[i]);
 
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        modelList[i]->Render(shaderList[i]);
+        modelList[i]->DrawSelfAndChildren(camera.getFrustum(), shaderList[i], display, total);
     }
+
+    // Render the scene stats
+    ImGui::SetNextWindowPos(ImVec2(mainWindow.getWidth() - 90,0));
+    ImGui::Begin("Scene Stats", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+    ImGui::Text("Display: %d", display);
+    ImGui::Text("Total: %d", total);
+    ImGui::End();
 
     // Unbind the shader
     glUseProgram(0);
@@ -107,6 +111,11 @@ int main()
     // Create the window
     mainWindow = Window(800, 600);
     mainWindow.Initialize();
+
+    mainWindow.keyCallback += [&](int key, int scancode, int action, int mods) {
+        if (key == GLFW_KEY_UP && action == GLFW_PRESS)
+            modelList[0]->transform.SetLocalPositon(modelList[0]->transform.GetLocalPosition() + glm::vec3(0.0f, 0.0f, 0.1f));
+    };
 
     // Calculate the desired frame time in seconds
     double desiredFrameTime = 1.0 / MAX_FPS;
@@ -120,16 +129,13 @@ int main()
     CreateShaders();
 
     // Create the camera
-    camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 0.1f);
+    camera = Camera(glm::vec3(0.0f, 0.0f, -10.0f), 45, mainWindow.getAspectRatio(), 0.1f, 100.0f);
 
     // Create the light
     mainLight = Light();
 
     // Create the material
-    shinyMaterial = Material(1.0f, 32); 
-
-    // Create the projection matrix
-    projection = glm::perspective(glm::radians(45.0f), mainWindow.getAspectRatio(), 0.1f, 100.0f);
+    shinyMaterial = Material(1.0f, 32);
 
     // Setup ImGui
     IMGUI_CHECKVERSION();
@@ -181,8 +187,6 @@ int main()
         // Update the window
         RenderScene();
 
-        ImGui::SetNextWindowSize(ImVec2(0,0));
-        ImGui::SetNextWindowPos(ImVec2(0,0));
         ImGui::Begin("Settings", NULL, ImGuiWindowFlags_NoSavedSettings);
         fps_values[fps_values_offset] = 1.0f / deltaTime;
         fps_values_offset = (fps_values_offset + 1) % IM_ARRAYSIZE(fps_values);
@@ -198,8 +202,6 @@ int main()
 
         ImGui::End();
 
-        ImGui::SetNextWindowSize(ImVec2(0,0));
-        ImGui::SetNextWindowPos(ImVec2(0,120));
         ImGui::Begin("Lighting", NULL, ImGuiWindowFlags_NoSavedSettings);
         // set new light color and intensity
         ImGui::ColorEdit3("Light Color", (float *)&mainLight.color);
@@ -214,6 +216,9 @@ int main()
         // Set new material specular intensity and shininess
         ImGui::SliderFloat("Material Specular Intensity", &shinyMaterial.specularIntensity, 0.0f, 1.0f);
         ImGui::SliderFloat("Material Shininess", &shinyMaterial.shininess, 1.0f, 256.0f);
+
+        // camera fov
+        ImGui::SliderFloat("Camera FOV", &camera.fov, 1.0f, 120.0f);
 
         ImGui::End();
 

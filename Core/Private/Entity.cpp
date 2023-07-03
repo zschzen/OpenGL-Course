@@ -10,14 +10,12 @@ Entity::Entity(std::string name, std::string tag, Model *model)
     : name(name), tag(tag), model(model)
 {
     aabb = std::make_unique<AABB>(generateAABB(*model));
-    UpdateSelfAndChildren();
 }
 
 Entity::Entity(std::string name, std::string tag, Transform transform, Model *model)
     : name(name), tag(tag), transform(transform), model(model)
 {
     aabb = std::make_unique<AABB>(generateAABB(*model));
-    UpdateSelfAndChildren();
 }
 
 Entity::~Entity()

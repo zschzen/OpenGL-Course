@@ -19,6 +19,8 @@ public:
 
     // Getters
     inline GLint getBufferWidth() const { return bufferWidth; }
+    inline GLint getWidth() const { return width; }
+    inline GLint getHeight() const { return height; }
     inline GLint getBufferHeight() const { return bufferHeight; }
     inline GLfloat getAspectRatio() const { return aspectRatio; }
     inline bool getShouldClose() const { return glfwWindowShouldClose(mainWindow); }
