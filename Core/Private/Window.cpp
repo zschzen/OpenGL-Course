@@ -28,8 +28,11 @@ int Window::Initialize()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);				   // Set major version to 3
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);				   // Set minor version to 3
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Use core profile (no backwards compatibility)
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);		   // Allow forward compatibility
 	glfwWindowHint(GLFW_SAMPLES, 8);							   // 8x antialiasing
+
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);			// Required for Mac
+#endif
 
 	// Enable vsync
 	glfwSwapInterval(1);
