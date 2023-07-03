@@ -36,13 +36,13 @@ void main()
 	vec4 diffuseColour = vec4(directionalLight.colour, 1.0f) * directionalLight.diffuseIntensity * diffuseFactor;
 
 	// Calculate specular lighting
-	vec4 specularColour = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+	vec4 specularColour = vec4(0, 0, 0, 0);
 	if (diffuseFactor > 0.0f)
 	{
 		// Get the direction from the fragment to the eye
 		vec3 fragToEye = normalize(eyePos - FragPos);
 		// Calculate the reflection vector
-		vec3 reflectedLight = normalize( reflect( normalize( directionalLight.direction ), normalize( Normal ) ) );
+		vec3 reflectedLight = normalize( reflect( -normalize( directionalLight.direction ), normalize( Normal ) ) );
 
 		// Calculate specular factor
 		float specularFactor = dot(fragToEye, reflectedLight);
