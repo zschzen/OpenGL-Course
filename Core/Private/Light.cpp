@@ -1,5 +1,8 @@
 #include "../Public/Light.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
+#include "../Public/Shader.h"
 
 Light::Light()
 {
@@ -15,13 +18,13 @@ Light::Light(GLfloat red, GLfloat green, GLfloat blue, GLfloat aIntensity,
     diffuseIntensity = dIntensity;
 }
 
-void Light::Use(GLuint ambientIntensityLocation, GLuint ambientColorLocation, GLuint diffuseIntensityLocation, GLuint diffuseDirectionLocation)
+void Light::Use(Shader& shader)
 {
-    glUniform3f(ambientColorLocation, color.x, color.y, color.z);
-    glUniform1f(ambientIntensityLocation, ambientIntensity);
+    shader.SetVec3("directionalLight.colour", color);
+    shader.SetFloat("directionalLight.ambientIntensity", ambientIntensity);
 
-    glUniform3f(diffuseDirectionLocation, direction.x, direction.y, direction.z);
-    glUniform1f(diffuseIntensityLocation, diffuseIntensity);
+    shader.SetVec3("directionalLight.direction", direction);
+    shader.SetFloat("directionalLight.diffuseIntensity", diffuseIntensity);
 }
 
 Light::~Light()

@@ -23,6 +23,8 @@ public:
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 
     void Update(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+
+    void ActivateTextures(Shader& shader);
     void Draw(Shader& shader);
     void Clear();
 

@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <map>
 
 #include <GL/glew.h>
 
@@ -25,13 +26,14 @@ public:
     void SetVec3(const char* name, glm::vec3 value);
     void SetMat4(const char* name, glm::mat4 value);
 
-    // Getters
-    inline GLuint GetUniformLocation(const char* name) const { return glGetUniformLocation(shaderID, name); }
-
-    void Use();
+    inline void Use() { glUseProgram(shaderID); }
     void Clear();
 
     ~Shader();
+
+public:
+    // Get cached uniform location. If not cached, cache it.
+    GLuint GetUniformLocation(const char* name);
 
 private:
     GLuint shaderID = 0;
@@ -41,4 +43,10 @@ private:
 
 private:
     std::string GetAbsolutePath(const char* fileLocation);
+
+    // Map of all uniform locations
+    std::map<std::string, GLuint> uniformLocations = std::map<std::string, GLuint>();
+
+    // Check if a uniform location is already cached
+    inline bool IsCached(const char* name) const { return uniformLocations.find(name) != uniformLocations.end(); }
 };

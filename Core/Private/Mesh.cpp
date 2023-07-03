@@ -45,7 +45,7 @@ void Mesh::Update(std::vector<Vertex> vertices, std::vector<unsigned int> indice
     meshFilter = subMesh;
 }
 
-void Mesh::Draw(Shader& shader)
+void Mesh::ActivateTextures(Shader& shader)
 {
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;
@@ -65,6 +65,11 @@ void Mesh::Draw(Shader& shader)
         glBindTexture(GL_TEXTURE_2D, meshFilter.textures[i].id);
     }
     glActiveTexture(GL_TEXTURE0);
+}
+
+void Mesh::Draw(Shader& shader)
+{
+    ActivateTextures(shader);
 
     // Draw mesh
     glBindVertexArray(meshFilter.VAO);

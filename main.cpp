@@ -91,13 +91,8 @@ void RenderScene()
         shaderList[i].SetVec3("eyePos", camera.getCameraPosition());
 
         // Update the light
-        mainLight.Use(shaderList[i].GetUniformLocation("directionalLight.ambientIntensity"),
-                      shaderList[i].GetUniformLocation("directionalLight.colour"),
-                      shaderList[i].GetUniformLocation("directionalLight.diffuseIntensity"),
-                      shaderList[i].GetUniformLocation("directionalLight.direction"));
-
-        shinyMaterial.Use(shaderList[i].GetUniformLocation("material.specularIntensity"),
-                          shaderList[i].GetUniformLocation("material.shininess"));
+        mainLight.Use(shaderList[i]);
+        shinyMaterial.Use(shaderList[i]);
 
         // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         modelList[i]->Render(shaderList[i]);
@@ -218,7 +213,7 @@ int main()
 
         // Set new material specular intensity and shininess
         ImGui::SliderFloat("Material Specular Intensity", &shinyMaterial.specularIntensity, 0.0f, 1.0f);
-        ImGui::SliderFloat("Material Shininess", &shinyMaterial.shininess, 0.0f, 256.0f);
+        ImGui::SliderFloat("Material Shininess", &shinyMaterial.shininess, 1.0f, 256.0f);
 
         ImGui::End();
 

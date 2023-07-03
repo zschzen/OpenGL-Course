@@ -6,6 +6,9 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
+// Forward declaration
+class Shader;
+
 class Light
 {
 public:
@@ -13,8 +16,7 @@ public:
     Light(GLfloat red, GLfloat green, GLfloat blue, GLfloat aIntensity,
           GLfloat xDir, GLfloat yDir, GLfloat zDir, GLfloat dIntensity);
 
-    void Use(GLuint ambientIntensityLocation, GLuint ambientColorLocation,
-             GLuint diffuseIntensityLocation, GLuint diffuseDirectionLocation);
+    void Use(Shader& shader);
 
     ~Light();
 

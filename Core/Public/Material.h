@@ -5,13 +5,16 @@
 
 #include <GL/glew.h>
 
+// Forward declaration
+class Shader;
+
 class Material
 {
 public:
     Material();
     Material(GLfloat sIntensity, GLfloat shine);
     
-    void Use(GLuint specularIntensityLocation, GLuint shininessLocation);
+    void Use(Shader& shader);
     
     ~Material();
 

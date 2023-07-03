@@ -78,6 +78,15 @@ void Shader::CompileShader(const char* vertexCode, const char* fragmentCode)
     }
 }
 
+GLuint Shader::GetUniformLocation(const char* name)
+{
+    if (IsCached(name)) return uniformLocations[name];
+
+    GLuint location = glGetUniformLocation(shaderID, name);
+    uniformLocations[name] = location;
+    return location;
+}
+
 void Shader::SetInt(const char* name, int value)
 {
     glUniform1i(GetUniformLocation(name), value);
@@ -98,18 +107,12 @@ void Shader::SetMat4(const char* name, glm::mat4 value)
     glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void Shader::Use()
-{
-	glUseProgram(shaderID);
-}
-
 void Shader::Clear()
 {
     if (shaderID == 0) return;
     glDeleteProgram(shaderID);
     shaderID = 0;
 }
-
 
 void Shader::AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType)
 {
