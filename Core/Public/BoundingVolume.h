@@ -135,6 +135,8 @@ struct AABB : public BoundingVolume
     {
     }
 
+    ~AABB() = default;
+
     std::array<glm::vec3, 8> getVertice() const
     {
         std::array<glm::vec3, 8> vertice;
