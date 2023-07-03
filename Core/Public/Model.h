@@ -31,6 +31,8 @@ public:
     void Render(Shader& shader);
     void Clear();
 
+    const std::vector<Mesh*>& GetMeshes() const { return meshes; }
+
 private:
     std::vector<Mesh*> meshes = std::vector<Mesh*>();
     std::vector<Texture> texturesLoaded = std::vector<Texture>(); 
