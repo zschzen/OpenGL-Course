@@ -28,14 +28,14 @@ public:
 
     Transform transform = Transform();
 
-    std::list<std::unique_ptr<Entity>> children = {};
+    std::list<std::unique_ptr<Entity>> children = std::list<std::unique_ptr<Entity>>();
     Entity* parent = nullptr;
 
     Model* model = nullptr;
-    std::unique_ptr<AABB> aabb = nullptr;
+    std::unique_ptr<AABB> aabb;
 
     Entity();
-    Entity(std::string name, std::string tag, Model* model);
+    Entity(Model* model);
     Entity(std::string name, std::string tag, Transform transform, Model* model);
 
     ~Entity();
