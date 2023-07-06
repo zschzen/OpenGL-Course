@@ -133,6 +133,7 @@ namespace Vosgi
 
             // Draw FPS sampler
             ImGui::SetNextWindowPos(ImVec2(0, 0));
+            ImGui::SetNextWindowSize(ImVec2(0, 0));
             ImGui::Begin("FPS Sampler");
             ImGui::Text("FPS: %.1f", 1.0f / deltaTime);
             ImGui::End();
