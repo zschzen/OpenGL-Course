@@ -1,84 +1,78 @@
-#pragma once
+#ifndef __WINDOW_H__
+#define __WINDOW_H__
 
-#include <stdio.h>
-#include <array>
+#pragma once
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "Delegates.h"
-
-class Window
+namespace Vosgi
 {
-public:
-    Window();
+    class WindowHandle
+    {
+    public:
+        void virtual Draw(float deltaTime) {}
+        void virtual KeyCallback(int key, int scancode, int action, int mods) {}
+        void virtual MouseCallback(double xPos, double yPos) {}
+        void virtual MouseButtonCallback(int button, int action, int mods) {}
+        void virtual ScrollCallback(double xOffset, double yOffset) {}
+        void virtual CharCallback(unsigned int codepoint) {}
+    };
 
-    Window(GLint windowWidth, GLint windowHeight);
+    class Window
+    {
+    public:
+        Window(WindowHandle *windowHandle, GLint width, GLint height)
+            : windowHandle(windowHandle), width(width), height(height)
+        {
+            bufferWidth = width;
+            bufferHeight = height;
+            aspectRatio = (GLfloat)width / (GLfloat)height;
+        }
 
-    int Initialize();
+        virtual int Initialize() = 0;
+        virtual void Run() = 0;
+        virtual void SwapBuffers() = 0;
+        virtual void PollEvents() = 0;
+        virtual void Terminate() = 0;
+        virtual void SetMouseEnabled(bool enabled) = 0;
+        virtual void SetWindowLabel(const char* label) = 0;
 
-    // Getters
-    inline GLint getBufferWidth() const { return bufferWidth; }
-    inline GLint getWidth() const { return width; }
-    inline GLint getHeight() const { return height; }
-    inline GLint getBufferHeight() const { return bufferHeight; }
-    inline GLfloat getAspectRatio() const { return aspectRatio; }
-    inline bool getShouldClose() const { return glfwWindowShouldClose(mainWindow); }
-    inline GLFWwindow* getWindow() const { return mainWindow; }
+        virtual void CreateCallbacks() = 0;
 
-    inline bool* getKeys() { return keys; }
-    GLfloat getXChange();
-    GLfloat getYChange();
+        // Getters
+        inline GLint GetBufferWidth() const { return bufferWidth; }
+        inline GLint GetWidth() const { return width; }
+        inline GLint GetHeight() const { return height; }
+        inline GLint GetBufferHeight() const { return bufferHeight; }
+        inline GLfloat GetAspectRatio() const { return aspectRatio; }
+        inline WindowHandle* GetWindowHandle() const { return windowHandle; }
 
-    // Setters
-    inline void setShouldClose(bool shouldClose) { glfwSetWindowShouldClose(mainWindow, shouldClose ? GL_TRUE : GL_FALSE); }
-    inline void setWindowLabel(const char* label) { glfwSetWindowTitle(mainWindow, label); }
+        inline float GetDeltaTime() const { return deltaTime; }
 
-    void setMouseEnabled(bool enabled);
+    protected:
+        WindowHandle* windowHandle;
+        GLint width = 0, height = 0;
+        GLint bufferWidth = 0, bufferHeight = 0;
+        GLfloat aspectRatio = 0;
 
-    // Other
-    inline void swapBuffers() { glfwSwapBuffers(mainWindow); }
+        int maxFPS = 60;
+        float deltaTime = 0.0f;
+        float lastTime = 0.0f;
+        float currentTime = 0.0f;
+        float desiredFrameTime = 1.0f / maxFPS;
 
-    // Callbacks
-    Delegate<int, int, int, int> keyCallback = Delegate<int, int, int, int>();
-    Delegate<double, double> mouseCallback = Delegate<double, double>();
+        // Calculate delta time
+        virtual void CalculateDeltaTime()
+        {
+            currentTime = static_cast<float>(glfwGetTime());
+            deltaTime = currentTime - lastTime;
+        }
 
-    ~Window();
+    public:
+        ~Window() = default;
+    };
 
-private:
-    GLFWwindow* mainWindow = nullptr;
+} // namespace Vosgi
 
-    GLint width = 0;
-    GLint height = 0;
-    GLint bufferWidth = 0, bufferHeight = 0;
-    GLfloat aspectRatio = 0;
-
-    // Keys and mouse
-    bool keys[1024]{false};
-
-    GLfloat lastX = 0, lastY = 0;
-    GLfloat xChange = 0, yChange = 0;
-    bool mouseFirstMoved = true;
-    bool mouseEnabled = true;
-
-    // Callbacks
-    void createCallbacks();
-
-    /*
-    * @brief: Handles key presses and releases.
-    * @param window: The window that received the event.
-    * @param key: The keyboard key that was pressed or released.
-    * @param code: The system-specific scancode of the key.
-    * @param action: GLFW_PRESS, GLFW_RELEASE or GLFW_REPEAT.
-    * @param mode: Bit field describing which modifier keys were held down.
-    */
-    static void handleKeys(GLFWwindow* window, int key, int code, int action, int mode);
-
-    /*
-    * @brief: Handles mouse movement.
-    * @param window: The window that received the event.
-    * @param xPos: The new cursor x-coordinate, relative to the left edge of the client area.
-    * @param yPos: The new cursor y-coordinate, relative to the top edge of the client area.
-    */
-    static void handleMouse(GLFWwindow* window, double xPos, double yPos);
-};
+#endif // !__WINDOW_H__
