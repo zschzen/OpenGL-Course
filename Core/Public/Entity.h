@@ -4,11 +4,11 @@
 #pragma once
 
 #include <glm/glm.hpp> //glm::mat4
-#include <list> //std::list
-#include <array> //std::array
-#include <memory> //std::unique_ptr
-#include <algorithm> //std::max
-#include <limits> //std::numeric_limits
+#include <list>        //std::list
+#include <array>       //std::array
+#include <memory>      //std::unique_ptr
+#include <algorithm>   //std::max
+#include <limits>      //std::numeric_limits
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -20,35 +20,39 @@
 #include "Model.h"
 #include "BoundingVolume.h"
 
-class Entity
+namespace Vosgi
 {
-public:
-    std::string name = "New Entity";
-    std::string tag = "Untagged";
+    class Entity
+    {
+    public:
+        std::string name = "New Entity";
+        std::string tag = "Untagged";
+        bool enabled = true;
 
-    Transform transform = Transform();
+        Transform transform = Transform();
 
-    std::list<std::unique_ptr<Entity>> children = std::list<std::unique_ptr<Entity>>();
-    Entity* parent = nullptr;
+        std::list<std::unique_ptr<Entity>> children = std::list<std::unique_ptr<Entity>>();
+        Entity *parent = nullptr;
 
-    Model* model = nullptr;
-    std::unique_ptr<AABB> aabb;
+        Model *model = nullptr;
+        std::unique_ptr<AABB> aabb;
 
-    Entity();
-    Entity(Model* model);
-    Entity(std::string name, std::string tag, Transform transform, Model* model);
+        Entity();
+        Entity(Model *model);
+        Entity(std::string name, std::string tag, Transform transform, Model *model);
 
-    ~Entity();
+        ~Entity();
 
-    void AddChild(std::unique_ptr<Entity> child);
-    void RemoveChild(Entity* child);
+        void AddChild(std::unique_ptr<Entity> child);
+        void RemoveChild(Entity *child);
+        void RemoveChild(int index);
 
-    AABB* GetWorldAABB() const;
+        AABB *GetWorldAABB() const;
 
-    void UpdateSelfAndChildren();
-    void ForceUpdateSelfAndChildren();
+        void UpdateSelfAndChildren();
+        void ForceUpdateSelfAndChildren();
 
-    void DrawSelfAndChildren(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& total);
-};
-
+        void DrawSelfAndChildren(const Frustum &frustum, Shader &shader, unsigned int &display, unsigned int &draw, unsigned int &total);
+    };
+}
 #endif // !__ENTITY_H__
