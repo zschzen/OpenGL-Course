@@ -5,6 +5,11 @@ Shader::Shader()
     shaderID = 0;
 }
 
+Shader::Shader(const char* vertexLocation, const char* fragmentLocation)
+{
+    CreateFromFiles(vertexLocation, fragmentLocation);
+}
+
 void Shader::CreateFromString(const char* vertexCode, const char* fragmentCode)
 {
     CompileShader(vertexCode, fragmentCode);
@@ -100,6 +105,21 @@ void Shader::SetFloat(const char* name, float value)
 void Shader::SetVec3(const char* name, glm::vec3 value)
 {
     glUniform3fv(GetUniformLocation(name), 1, glm::value_ptr(value));
+}
+
+void Shader::SetVec3(const char* name, float x, float y, float z)
+{
+    glUniform3f(GetUniformLocation(name), x, y, z);
+}
+
+void Shader::SetVec4(const char* name, glm::vec4 value)
+{
+    glUniform4fv(GetUniformLocation(name), 1, glm::value_ptr(value));
+}
+
+void Shader::SetVec4(const char* name, float x, float y, float z, float w)
+{
+    glUniform4f(GetUniformLocation(name), x, y, z, w);
 }
 
 void Shader::SetMat4(const char* name, glm::mat4 value)
