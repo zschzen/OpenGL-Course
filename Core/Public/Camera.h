@@ -16,7 +16,7 @@ public:
     Camera(glm::vec3 startPos, GLfloat fov, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane);
     ~Camera();
 
-    void keyControl(bool* key, GLfloat deltaTime);
+    void keyControl(bool* key, float deltaTime);
     void mouseControl(GLfloat xChange, GLfloat yChange);
 
     inline glm::vec3 getCameraPosition() const { return position; }

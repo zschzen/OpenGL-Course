@@ -13,6 +13,9 @@ Camera::Camera()
     movementSpeed = 5.0f;
     turnSpeed = 0.1f;
 
+    // Calculate the projection matrix
+    projection = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
+
     update();
 }
 
@@ -31,6 +34,9 @@ Camera::Camera(glm::vec3 startPos, GLfloat fov, GLfloat aspectRatio, GLfloat nea
     this->aspectRatio = aspectRatio;
     this->nearPlane = nearPlane;
     this->farPlane = farPlane;
+
+    // Calculate the projection matrix
+    projection = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 
     update();
 }
@@ -108,9 +114,6 @@ void Camera::update()
 
     right = glm::normalize(glm::cross(front, worldUp));
     up = glm::normalize(glm::cross(right, front));
-
-    // Calculate the projection matrix
-    projection = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 }
 
 // TODO: Cache frustum planes
