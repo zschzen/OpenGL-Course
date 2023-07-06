@@ -15,13 +15,10 @@ namespace Vosgi
         shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
 
         // Create objects
-        Model* model1 = new Model("Models/flower/flower.obj");
-        Entity* entity1 = new Entity(model1);
-        Entity* entity2 = new Entity(model1);
-        entity1->AddChild(std::unique_ptr<Entity>(entity2));
+        Entity* entity1 = new Entity();
+        entity1->AddBehaviour<Model>("Models/flower/flower.obj");
         entity1->transform.SetLocalPosition(glm::vec3(0.0f, 0.0f, 0.0f));
         entity1->transform.SetLocalScale(glm::vec3(0.1f, 0.1f, 0.1f));
-        entity2->transform.SetLocalPosition(glm::vec3(30.0f, 0.0f, 0.0f));
         entities.push_back(std::unique_ptr<Entity>(entity1));
     }
 

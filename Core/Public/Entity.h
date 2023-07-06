@@ -18,6 +18,7 @@
 #include "Frustum.h"
 #include "Shader.h"
 #include "Model.h"
+#include "Behaviour.h"
 #include "BoundingVolume.h"
 
 namespace Vosgi
@@ -27,15 +28,12 @@ namespace Vosgi
     public:
         std::string name = "New Entity";
         std::string tag = "Untagged";
-        bool enabled = true;
 
         Transform transform = Transform();
 
         std::list<std::unique_ptr<Entity>> children = std::list<std::unique_ptr<Entity>>();
+        std::list<std::unique_ptr<Behaviour>> behaviours = std::list<std::unique_ptr<Behaviour>>();
         Entity *parent = nullptr;
-
-        Model *model = nullptr;
-        std::unique_ptr<AABB> aabb;
 
         Entity();
         Entity(Model *model);
@@ -47,7 +45,42 @@ namespace Vosgi
         void RemoveChild(Entity *child);
         void RemoveChild(int index);
 
-        AABB *GetWorldAABB() const;
+        template <typename T, typename... Args>
+        T* AddBehaviour(Args&&...args)
+        {
+            T* behaviour = new T(std::forward<Args>(args)...);
+            behaviour->transform = &transform;
+            behaviours.push_back(std::unique_ptr<T>(behaviour));
+
+            return behaviour;
+        }
+
+        template <typename T>
+        T *GetBehaviour()
+        {
+            for (auto &behaviour : behaviours)
+            {
+                if (dynamic_cast<T *>(behaviour.get()))
+                {
+                    return dynamic_cast<T *>(behaviour.get());
+                }
+            }
+
+            return nullptr;
+        }
+
+        template <typename T>
+        void RemoveBehaviour()
+        {
+            for (auto &behaviour : behaviours)
+            {
+                if (dynamic_cast<T *>(behaviour.get()))
+                {
+                    behaviours.remove(behaviour);
+                    return;
+                }
+            }
+        }
 
         void UpdateSelfAndChildren();
         void ForceUpdateSelfAndChildren();

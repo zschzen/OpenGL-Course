@@ -4,12 +4,14 @@
 
 #include "../Public/Shader.h"
 #include "../Public/MeshData.h"
+#include "../Public/Frustum.h"
 
 Model::Model() {}
 
 Model::Model(const char* path)
 {
     LoadModel(path);
+    aabb = std::make_unique<Vosgi::AABB>(Vosgi::generateAABB(meshes));
 }
 
 Model::~Model()
@@ -26,12 +28,50 @@ void Model::Render(Shader& shader, unsigned int& draw)
     }
 }
 
+void Model::Draw(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw)
+{
+    if (!aabb->isOnFrustum(frustum, *transform)) return;
+
+    shader.SetMat4("model", transform->GetModel());
+    for (auto& mesh : meshes)
+    {
+        mesh->Draw(shader);
+        draw++;
+    }
+    display++;
+}
+
 void Model::Clear()
 {
     for (auto& mesh : meshes)
     {
         mesh->Clear();
     }
+}
+
+Vosgi::AABB* Model::GetWorldAABB()
+{
+    // Get global scale thanks to our transform
+    const glm::vec3 globalCenter{transform->GetModel() * glm::vec4(aabb->center, 1.f)};
+
+    // Scaled orientation
+    const glm::vec3 right = transform->GetRight() * aabb->extents.x;
+    const glm::vec3 up = transform->GetUp() * aabb->extents.y;
+    const glm::vec3 forward = transform->GetForward() * aabb->extents.z;
+
+    const float newIi = std::abs(glm::dot(glm::vec3{1.f, 0.f, 0.f}, right)) +
+                        std::abs(glm::dot(glm::vec3{1.f, 0.f, 0.f}, up)) +
+                        std::abs(glm::dot(glm::vec3{1.f, 0.f, 0.f}, forward));
+
+    const float newIj = std::abs(glm::dot(glm::vec3{0.f, 1.f, 0.f}, right)) +
+                        std::abs(glm::dot(glm::vec3{0.f, 1.f, 0.f}, up)) +
+                        std::abs(glm::dot(glm::vec3{0.f, 1.f, 0.f}, forward));
+
+    const float newIk = std::abs(glm::dot(glm::vec3{0.f, 0.f, 1.f}, right)) +
+                        std::abs(glm::dot(glm::vec3{0.f, 0.f, 1.f}, up)) +
+                        std::abs(glm::dot(glm::vec3{0.f, 0.f, 1.f}, forward));
+
+    return new Vosgi::AABB(globalCenter, newIi, newIj, newIk);
 }
 
 void Model::LoadModel(const std::string& fileName)

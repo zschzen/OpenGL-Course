@@ -7,21 +7,13 @@ namespace Vosgi
 
     Entity::Entity()
     {
-    }
-
-    Entity::Entity(Model *model)
-        : model(model)
-    {
         name = std::string("New Entity");
         tag = std::string("Untagged");
-
-        aabb = std::make_unique<AABB>(generateAABB(*model));
     }
 
     Entity::Entity(std::string name, std::string tag, Transform transform, Model *model)
-        : name(name), tag(tag), transform(transform), model(model)
+        : name(name), tag(tag), transform(transform)
     {
-        aabb = std::make_unique<AABB>(generateAABB(*model));
     }
 
     Entity::~Entity()
@@ -45,31 +37,6 @@ namespace Vosgi
         auto it = children.begin();
         std::advance(it, index);
         children.erase(it);
-    }
-
-    AABB *Entity::GetWorldAABB() const
-    {
-        // Get global scale thanks to our transform
-        const glm::vec3 globalCenter{transform.GetModel() * glm::vec4(aabb->center, 1.f)};
-
-        // Scaled orientation
-        const glm::vec3 right = transform.GetRight() * aabb->extents.x;
-        const glm::vec3 up = transform.GetUp() * aabb->extents.y;
-        const glm::vec3 forward = transform.GetForward() * aabb->extents.z;
-
-        const float newIi = std::abs(glm::dot(glm::vec3{1.f, 0.f, 0.f}, right)) +
-                            std::abs(glm::dot(glm::vec3{1.f, 0.f, 0.f}, up)) +
-                            std::abs(glm::dot(glm::vec3{1.f, 0.f, 0.f}, forward));
-
-        const float newIj = std::abs(glm::dot(glm::vec3{0.f, 1.f, 0.f}, right)) +
-                            std::abs(glm::dot(glm::vec3{0.f, 1.f, 0.f}, up)) +
-                            std::abs(glm::dot(glm::vec3{0.f, 1.f, 0.f}, forward));
-
-        const float newIk = std::abs(glm::dot(glm::vec3{0.f, 0.f, 1.f}, right)) +
-                            std::abs(glm::dot(glm::vec3{0.f, 0.f, 1.f}, up)) +
-                            std::abs(glm::dot(glm::vec3{0.f, 0.f, 1.f}, forward));
-
-        return new AABB(globalCenter, newIi, newIj, newIk);
     }
 
     void Entity::UpdateSelfAndChildren()
@@ -104,13 +71,16 @@ namespace Vosgi
 
     void Entity::DrawSelfAndChildren(const Frustum &frustum, Shader &shader, unsigned int &display, unsigned int &draw, unsigned int &total)
     {
-        if (aabb->isOnFrustum(frustum, transform))
-        {
-            UpdateSelfAndChildren();
+        UpdateSelfAndChildren();
 
-            shader.SetMat4("model", transform.GetModel());
-            model->Render(shader, draw);
-            display++;
+        for (auto& component : behaviours)
+        {
+            if (!component->IsActive()) continue;
+
+            component->Update(0.0f);
+            // ...
+            component->LateUpdate(0.0f);
+            component->Draw(frustum, shader, display, draw);
         }
         total++;
 

@@ -9,10 +9,11 @@
 #include <memory>      //std::unique_ptr
 #include <algorithm>   //std::max
 #include <limits>      //std::numeric_limits
+#include <vector>      //std::vector
 
 #include "Frustum.h"
 #include "Transform.h"
-#include "Model.h"
+#include "Mesh.h"
 
 namespace Vosgi
 {
@@ -197,11 +198,11 @@ namespace Vosgi
         };
     };
 
-    static AABB generateAABB(const Model& model)
+    static AABB generateAABB(const std::vector<Mesh *> &meshes)
     {
         glm::vec3 minAABB = glm::vec3(std::numeric_limits<float>::max());
         glm::vec3 maxAABB = glm::vec3(std::numeric_limits<float>::min());
-        for (auto &&mesh : model.GetMeshes())
+        for (auto &&mesh : meshes)
         {
             for (auto &&vertex : mesh->GetVertices())
             {
@@ -217,11 +218,11 @@ namespace Vosgi
         return AABB(minAABB, maxAABB);
     }
 
-    static Sphere generateSphereBV(const Model& model)
+    static Sphere generateSphereBV(const std::vector<Mesh *> &meshes)
     {
         glm::vec3 minAABB = glm::vec3(std::numeric_limits<float>::max());
         glm::vec3 maxAABB = glm::vec3(std::numeric_limits<float>::min());
-        for (auto &&mesh : model.GetMeshes())
+        for (auto &&mesh : meshes)
         {
             for (auto &&vertex : mesh->GetVertices())
             {
