@@ -15,6 +15,7 @@ class Shader
 {
 public:
     Shader();
+    Shader(const char* vertexLocation, const char* fragmentLocation);
 
     void CreateFromString(const char* vertexCode, const char* fragmentCode);
     void CreateFromFiles(const char* vertexLocation, const char* fragmentLocation);
@@ -24,6 +25,9 @@ public:
     void SetInt(const char* name, int value);
     void SetFloat(const char* name, float value);
     void SetVec3(const char* name, glm::vec3 value);
+    void SetVec3(const char* name, float x, float y, float z);
+    void SetVec4(const char* name, glm::vec4 value);
+    void SetVec4(const char* name, float x, float y, float z, float w);
     void SetMat4(const char* name, glm::mat4 value);
 
     inline void Use() { glUseProgram(shaderID); }
