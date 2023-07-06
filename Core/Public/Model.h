@@ -1,4 +1,9 @@
+#ifndef __MODEL_H__
+#define __MODEL_H__
+
 #pragma once
+
+#define STB_IMAGE_IMPLEMENTATION
 
 #include <string.h>
 #include <vector>
@@ -13,8 +18,6 @@ struct Vertex;
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "stb/stb_image.h"
-
 #include "Mesh.h"
 #include "Texture.h"
 
@@ -28,7 +31,7 @@ public:
     Model(const char* path);
     ~Model();
 
-    void Render(Shader& shader);
+    void Render(Shader& shader, unsigned int& draw);
     void Clear();
 
     const std::vector<Mesh*>& GetMeshes() const { return meshes; }
@@ -45,3 +48,5 @@ private:
     std::vector<Texture> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
     unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma = false);
 };
+
+#endif // !__MODEL_H__

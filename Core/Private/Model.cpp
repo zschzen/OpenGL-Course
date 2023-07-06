@@ -1,4 +1,7 @@
 #include "../Public/Model.h"
+
+#include <stb/stb_image.h>
+
 #include "../Public/Shader.h"
 #include "../Public/MeshData.h"
 
@@ -14,11 +17,12 @@ Model::~Model()
     Clear();
 }
 
-void Model::Render(Shader& shader)
+void Model::Render(Shader& shader, unsigned int& draw)
 {
     for (auto& mesh : meshes)
     {
         mesh->Draw(shader);
+        draw++;
     }
 }
 
