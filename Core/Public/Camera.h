@@ -16,16 +16,18 @@ public:
     Camera(glm::vec3 startPos, GLfloat fov, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane);
     ~Camera();
 
-    void keyControl(bool* key, float deltaTime);
+    void keyControl(bool *key, float deltaTime);
     void mouseControl(GLfloat xChange, GLfloat yChange);
 
     inline glm::vec3 getCameraPosition() const { return position; }
     inline glm::vec3 getCameraDirection() const { return glm::normalize(front); }
 
+    // Getters
     inline glm::vec3 getFront() const { return front; }
     inline glm::vec3 getRight() const { return right; }
     inline glm::vec3 getUp() const { return up; }
     inline glm::vec3 getWorldUp() const { return worldUp; }
+    inline GLfloat getFov() const { return fov; }
 
     inline glm::mat4 calculateViewMatrix() const { return glm::lookAt(position, position + front, up); }
 
@@ -33,6 +35,13 @@ public:
     Frustum getFrustum() const;
 
     inline glm::mat4 getProjectionMatrix() const { return projection; }
+
+    // Setters
+    inline void setFov(GLfloat newFov)
+    {
+        fov = newFov;
+        projection = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
+    }
 
 public:
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
