@@ -21,10 +21,16 @@ namespace Vosgi
         void SwapBuffers() override;
         void PollEvents() override;
         void Terminate() override;
+
         void SetWindowLabel(const char *label) override;
         void SetMouseEnabled(bool enabled) override;
 
         void CreateCallbacks() override;
+
+        // Frame buffer size callback
+        static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
+
+        // Input callbacks
         static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
         static void MousePositionCallback(GLFWwindow* window, double xPos, double yPos);
         static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
@@ -36,7 +42,10 @@ namespace Vosgi
     protected:
         GLFWwindow* window = nullptr;
 
-        bool mouseEnabled = false;
+    private:
+        // Sample fps counter
+        float fps_values[180]{0};
+        int fps_values_offset = 0;
     };
 }
 

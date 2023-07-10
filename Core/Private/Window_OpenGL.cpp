@@ -33,7 +33,7 @@ namespace Vosgi
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);                 // Set major version to 3
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);                 // Set minor version to 3
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Use core profile (no backwards compatibility)
-        glfwWindowHint(GLFW_SAMPLES, 8);                               // 8x antialiasing
+        glfwWindowHint(GLFW_SAMPLES, 4);                               // 4x antialiasing
 
 #ifdef __APPLE__
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Required for Mac
@@ -51,6 +51,9 @@ namespace Vosgi
             return 1;
         }
 
+        // Maximize the window
+        //glfwMaximizeWindow(window);
+
         // Get buffer size information
         glfwGetFramebufferSize(window, &bufferWidth, &bufferHeight);
 
@@ -59,6 +62,9 @@ namespace Vosgi
 
         // Handle key and mouse input
         CreateCallbacks();
+
+        // Handle window resizing
+        glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 
         // Lock the cursor to the window
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -98,10 +104,14 @@ namespace Vosgi
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init("#version 330");
 
-        lastTime = 0.0f;
-        currentTime = 0.0f;
         do
         {
+            // Resize the viewport
+            glfwGetFramebufferSize(window, &bufferWidth, &bufferHeight);
+            glViewport(0, 0, bufferWidth, bufferHeight);
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LESS);
+
             // Calculate delta time
             CalculateDeltaTime();
 
@@ -112,12 +122,17 @@ namespace Vosgi
                 if (sleepTime > 0)
                 {
                     std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
-                    CalculateDeltaTime();
+                    continue;
                 }
             }
 
             // Update the previous frame time
             lastTime = currentTime;
+
+            // Reset counters
+            unsigned int displayCount = 0;
+            unsigned int drawCount = 0;
+            unsigned int entityCount = 0;
 
             // Get + Handle User Input
             PollEvents();
@@ -131,15 +146,25 @@ namespace Vosgi
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
+            // Update the window
+            windowHandle->Draw(deltaTime, displayCount, drawCount, entityCount);
+
             // Draw FPS sampler
             ImGui::SetNextWindowPos(ImVec2(0, 0));
             ImGui::SetNextWindowSize(ImVec2(0, 0));
-            ImGui::Begin("FPS Sampler");
-            ImGui::Text("FPS: %.1f", 1.0f / deltaTime);
-            ImGui::End();
+            ImGui::Begin("FPS");
+            fps_values[fps_values_offset] = 1.0f / deltaTime;
+            fps_values_offset = (fps_values_offset + 1) % IM_ARRAYSIZE(fps_values);
+            char buffer[32];
+            sprintf(buffer, "FPS: %.2f (%.2fms)\n\nDisplay: %d\nDraw: %d\nEntity: %d", 1.0f / deltaTime, deltaTime * 1000, displayCount, drawCount, entityCount);
 
-            // Update the window
-            windowHandle->Draw(deltaTime);
+            ImGui::PlotLines(buffer, fps_values, IM_ARRAYSIZE(fps_values), fps_values_offset, NULL, 0.0f, 100.0f, ImVec2(0, 120));
+
+            // Set new fps
+            ImGui::SliderInt("Max FPS", &maxFPS, 1, 144);
+            desiredFrameTime = 1.0 / maxFPS;
+
+            ImGui::End();
 
             // Render ImGui
             ImGui::Render();
@@ -181,7 +206,8 @@ namespace Vosgi
 
     void Window_OpenGL::SetMouseEnabled(bool enabled)
     {
-        glfwSetInputMode(window, GLFW_CURSOR, enabled ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+        m_mouseEnabled = enabled;
+        glfwSetInputMode(window, GLFW_CURSOR, enabled ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
     }
 
     void Window_OpenGL::CreateCallbacks()
@@ -190,6 +216,11 @@ namespace Vosgi
         glfwSetMouseButtonCallback(window, MouseButtonCallback);
         glfwSetScrollCallback(window, ScrollCallback);
         glfwSetKeyCallback(window, KeyCallback);
+    }
+
+    void Window_OpenGL::FramebufferSizeCallback(GLFWwindow *window, int width, int height)
+    {
+        glViewport(0, 0, width, height);
     }
 
     void Window_OpenGL::KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
