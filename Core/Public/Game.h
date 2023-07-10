@@ -30,11 +30,12 @@ namespace Vosgi
 
         void Run();
 
-        void Draw(float deltaTime) override;
+        void Draw(float deltaTime, unsigned int& displayCount, unsigned int& drawCount, unsigned int& entityCount) override;
 
         // Callbacks
         void KeyCallback(int key, int scancode, int action, int mods) override;
         void MouseCallback(double xPos, double yPos) override;
+        void ScrollCallback(double xOffset, double yOffset) override;
 
     private:
         Window *window = nullptr;
@@ -45,7 +46,6 @@ namespace Vosgi
         GLfloat lastX = 0, lastY = 0;
         GLfloat xChange = 0, yChange = 0;
         bool mouseFirstMoved = true;
-        bool mouseEnabled = true;
 
         Camera camera;
         Light mainLight = Light(1.0f, 1.0f, 1.0f, 1.0f, 0.5f, 0.0f, 0.0f, 1.0f);
