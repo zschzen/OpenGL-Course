@@ -139,7 +139,7 @@ namespace Vosgi
         {
         }
 
-        ~AABB() = default;
+        virtual ~AABB() = default;
 
         std::array<glm::vec3, 8> getVertice() const
         {
