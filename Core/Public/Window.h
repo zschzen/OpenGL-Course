@@ -11,7 +11,7 @@ namespace Vosgi
     class WindowHandle
     {
     public:
-        void virtual Draw(float deltaTime) {}
+        void virtual Draw(float deltaTime, unsigned int& displayCount, unsigned int& drawCount, unsigned int& entityCount) {}
         void virtual KeyCallback(int key, int scancode, int action, int mods) {}
         void virtual MouseCallback(double xPos, double yPos) {}
         void virtual MouseButtonCallback(int button, int action, int mods) {}
@@ -35,10 +35,12 @@ namespace Vosgi
         virtual void SwapBuffers() = 0;
         virtual void PollEvents() = 0;
         virtual void Terminate() = 0;
-        virtual void SetMouseEnabled(bool enabled) = 0;
-        virtual void SetWindowLabel(const char* label) = 0;
 
         virtual void CreateCallbacks() = 0;
+
+        // Setters
+        virtual void SetWindowLabel(const char* label) = 0;
+        virtual void SetMouseEnabled(bool enabled) = 0;
 
         // Getters
         inline GLint GetBufferWidth() const { return bufferWidth; }
@@ -47,6 +49,7 @@ namespace Vosgi
         inline GLint GetBufferHeight() const { return bufferHeight; }
         inline GLfloat GetAspectRatio() const { return aspectRatio; }
         inline WindowHandle* GetWindowHandle() const { return windowHandle; }
+        inline bool GetMouseEnabled() const { return m_mouseEnabled; }
 
         inline float GetDeltaTime() const { return deltaTime; }
 
@@ -56,7 +59,9 @@ namespace Vosgi
         GLint bufferWidth = 0, bufferHeight = 0;
         GLfloat aspectRatio = 0;
 
-        int maxFPS = 60;
+        bool m_mouseEnabled = true;
+
+        int maxFPS = 30;
         float deltaTime = 0.0f;
         float lastTime = 0.0f;
         float currentTime = 0.0f;
@@ -70,7 +75,7 @@ namespace Vosgi
         }
 
     public:
-        ~Window() = default;
+        virtual ~Window() = default;
     };
 
 } // namespace Vosgi
