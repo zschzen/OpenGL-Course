@@ -1,18 +1,11 @@
 #ifndef __ENTITY_H__
 #define __ENTITY_H__
 
-#pragma once
-
-#include <glm/glm.hpp> //glm::mat4
-#include <list>        //std::list
-#include <array>       //std::array
-#include <memory>      //std::unique_ptr
-#include <algorithm>   //std::max
-#include <limits>      //std::numeric_limits
-
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <list>
+#include <memory>
+#include <algorithm>
+#include <string>
 
 #include "Transform.h"
 #include "Frustum.h"
@@ -26,66 +19,88 @@ namespace Vosgi
     class Entity
     {
     public:
-        std::string name = "New Entity";
-        std::string tag = "Untagged";
-
-        Transform transform = Transform();
-
-        std::list<std::unique_ptr<Entity>> children = std::list<std::unique_ptr<Entity>>();
-        std::list<std::unique_ptr<Behaviour>> behaviours = std::list<std::unique_ptr<Behaviour>>();
-        Entity *parent = nullptr;
-
         Entity();
-        Entity(Model *model);
-        Entity(std::string name, std::string tag, Transform transform, Model *model);
-
+        Entity(std::string name, std::string tag);
         ~Entity();
 
         void AddChild(std::unique_ptr<Entity> child);
-        void RemoveChild(Entity *child);
-        void RemoveChild(int index);
+        void RemoveChild(Entity* child);
+        void RemoveChild(size_t index);
 
+        /* Add a behaviour to this entity. */
         template <typename T, typename... Args>
-        T* AddBehaviour(Args&&...args)
+        T* AddBehaviour(Args&&... args)
         {
+            static_assert(std::is_base_of<Behaviour, T>::value, "Must be derived from Behaviour");
             T* behaviour = new T(std::forward<Args>(args)...);
             behaviour->transform = &transform;
             behaviours.push_back(std::unique_ptr<T>(behaviour));
-
             return behaviour;
         }
 
+        /* Get the first behaviour of the given type. */
         template <typename T>
-        T *GetBehaviour()
+        T* GetBehaviour() const
         {
-            for (auto &behaviour : behaviours)
+            static_assert(std::is_base_of<Behaviour, T>::value, "Must be derived from Behaviour");
+            for (const auto& behaviour : behaviours)
             {
-                if (dynamic_cast<T *>(behaviour.get()))
-                {
-                    return dynamic_cast<T *>(behaviour.get());
-                }
-            }
+                T* castBehaviour = dynamic_cast<T*>(behaviour.get());
 
+                if (!castBehaviour) continue;
+                return castBehaviour;
+            }
             return nullptr;
         }
 
+        /* Get all behaviours of the given type. */
+        template <typename T>
+        std::list<T*> GetBehaviours() const
+        {
+            static_assert(std::is_base_of<Behaviour, T>::value, "Must be derived from Behaviour");
+            std::list<T*> castBehaviours = std::list<T*>();
+            for (const auto& behaviour : behaviours)
+            {
+                T* castBehaviour = dynamic_cast<T*>(behaviour.get());
+
+                if (!castBehaviour) continue;
+                castBehaviours.push_back(castBehaviour);
+            }
+            return castBehaviours;
+        }
+
+        /* Remove all behaviours of the given type. */
         template <typename T>
         void RemoveBehaviour()
         {
-            for (auto &behaviour : behaviours)
-            {
-                if (dynamic_cast<T *>(behaviour.get()))
-                {
-                    behaviours.remove(behaviour);
-                    return;
-                }
-            }
+            static_assert(std::is_base_of<Behaviour, T>::value, "Must be derived from Behaviour");
+            behaviours.remove_if([](const std::unique_ptr<Behaviour>& behaviour) {
+                return dynamic_cast<T*>(behaviour.get()) != nullptr;
+            });
         }
 
         void UpdateSelfAndChildren();
         void ForceUpdateSelfAndChildren();
 
-        void DrawSelfAndChildren(const Frustum &frustum, Shader &shader, unsigned int &display, unsigned int &draw, unsigned int &total);
+        void DrawSelfAndChildren(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw, unsigned int& total);
+
+        // Getters and Setters
+        std::string GetGUID() const { return GUID; }
+
+    public:
+        std::string name = "New Entity";
+        std::string tag = "Untagged";
+        Transform transform = Transform();
+
+        bool active = true;
+
+    private:
+        std::list<std::unique_ptr<Entity>> children;
+        std::list<std::unique_ptr<Behaviour>> behaviours;
+        Entity* parent = nullptr;
+
+        std::string GUID;
     };
-}
-#endif // !__ENTITY_H__
+} // namespace Vosgi
+
+#endif // __ENTITY_H__

@@ -1,6 +1,7 @@
 #include "../Public/Entity.h"
 
 #include "../Public/BoundingVolume.h"
+#include "../Public/GUID.h"
 
 namespace Vosgi
 {
@@ -9,10 +10,11 @@ namespace Vosgi
     {
         name = std::string("New Entity");
         tag = std::string("Untagged");
+        GUID = RandomGUID(5);
     }
 
-    Entity::Entity(std::string name, std::string tag, Transform transform, Model *model)
-        : name(name), tag(tag), transform(transform)
+    Entity::Entity(std::string name, std::string tag)
+        : name(name), tag(tag), GUID(RandomGUID(5))
     {
     }
 
@@ -32,7 +34,7 @@ namespace Vosgi
                            { return c.get() == child; });
     }
 
-    void Entity::RemoveChild(int index)
+    void Entity::RemoveChild(size_t index)
     {
         auto it = children.begin();
         std::advance(it, index);
@@ -71,6 +73,8 @@ namespace Vosgi
 
     void Entity::DrawSelfAndChildren(const Frustum &frustum, Shader &shader, unsigned int &display, unsigned int &draw, unsigned int &total)
     {
+        if (!active) return;
+
         UpdateSelfAndChildren();
 
         for (auto& component : behaviours)
