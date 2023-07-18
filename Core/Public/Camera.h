@@ -6,10 +6,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-// Forward declaration
-struct Frustum;
+#include "Behaviour.h"
 
-class Camera
+class Camera : public Vosgi::Behaviour
 {
 public:
     Camera();
@@ -18,18 +17,23 @@ public:
 
     void keyControl(bool *key, float deltaTime);
     void mouseControl(GLfloat xChange, GLfloat yChange);
+    void Draw(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw) override;
 
-    inline glm::vec3 getCameraPosition() const { return position; }
-    inline glm::vec3 getCameraDirection() const { return glm::normalize(front); }
+    inline glm::vec3 getCameraPosition() const { return transform->position; }
+    inline glm::vec3 getCameraDirection() const { return transform->GetForward(); }
 
     // Getters
-    inline glm::vec3 getFront() const { return front; }
-    inline glm::vec3 getRight() const { return right; }
-    inline glm::vec3 getUp() const { return up; }
+    inline glm::vec3 getFront() const { return transform->GetForward(); }
+    inline glm::vec3 getRight() const { return transform->GetRight(); }
+    inline glm::vec3 getUp() const { return transform->GetUp(); }
     inline glm::vec3 getWorldUp() const { return worldUp; }
     inline GLfloat getFov() const { return fov; }
 
-    inline glm::mat4 calculateViewMatrix() const { return glm::lookAt(position, position + front, up); }
+    inline glm::mat4 calculateViewMatrix() const
+    {
+        glm::vec3 pos = transform->position;
+        return glm::lookAt(pos, pos + transform->GetForward(), transform->GetUp());
+    }
 
     // Get frustum planes
     Frustum getFrustum() const;
@@ -44,14 +48,7 @@ public:
     }
 
 public:
-    glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-    glm::vec3 right = glm::vec3(1.0f, 0.0f, 0.0f);
     glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
-    GLfloat yaw = -90.0f;
-    GLfloat pitch = 0.0f;
 
     GLfloat movementSpeed = 5.0f;
     GLfloat turnSpeed = 0.1f;
@@ -61,6 +58,4 @@ public:
     GLfloat aspectRatio = 800.0f / 600.0f;
     GLfloat nearPlane = 0.1f;
     GLfloat farPlane = 100.0f;
-
-    void update();
 };

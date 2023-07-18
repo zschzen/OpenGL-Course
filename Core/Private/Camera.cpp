@@ -1,31 +1,22 @@
 #include "../Public/Camera.h"
 
 #include "../Public/Frustum.h"
+#include "../Public/Shader.h"
 
 Camera::Camera()
 {
-    position = glm::vec3(0.0f, 0.0f, 0.0f);
     worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
-    yaw = 90.0f;
-    pitch = 0.0f;
-    front = glm::vec3(0.0f, 0.0f, -1.0f);
 
     movementSpeed = 5.0f;
     turnSpeed = 0.1f;
 
     // Calculate the projection matrix
     projection = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
-
-    update();
 }
 
 Camera::Camera(glm::vec3 startPos, GLfloat fov, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane)
 {
-    position = startPos;
     worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
-    yaw = 90.0f;
-    pitch = 0.0f;
-    front = glm::vec3(0.0f, 0.0f, -1.0f);
 
     movementSpeed = 5.0f;
     turnSpeed = 0.1f;
@@ -37,8 +28,6 @@ Camera::Camera(glm::vec3 startPos, GLfloat fov, GLfloat aspectRatio, GLfloat nea
 
     // Calculate the projection matrix
     projection = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
-
-    update();
 }
 
 void Camera::keyControl(bool *keys, GLfloat deltaTime)
@@ -47,73 +36,68 @@ void Camera::keyControl(bool *keys, GLfloat deltaTime)
 
     if (keys[GLFW_KEY_W])
     {
-        position += front * velocity;
+        transform->position += transform->GetForward() * velocity;
+        transform->SetDirty();
     }
 
     if (keys[GLFW_KEY_S])
     {
-        position -= front * velocity;
+        transform->position -= transform->GetForward() * velocity;
+        transform->SetDirty();
     }
 
     if (keys[GLFW_KEY_A])
     {
-        position -= right * velocity;
+        transform->position -= transform->GetRight() * velocity;
+        transform->SetDirty();
     }
 
     if (keys[GLFW_KEY_D])
     {
-        position += right * velocity;
+        transform->position += transform->GetRight() * velocity;
+        transform->SetDirty();
     }
 
     if (keys[GLFW_KEY_Q])
     {
-        position -= worldUp * velocity;
+        transform->position -= worldUp * velocity;
+        transform->SetDirty();
     }
 
     if (keys[GLFW_KEY_E])
     {
-        position += worldUp * velocity;
+        transform->position += worldUp * velocity;
+        transform->SetDirty();
     }
 }
 
 void Camera::mouseControl(GLfloat xChange, GLfloat yChange)
 {
-    xChange *= turnSpeed;
+    xChange *= -turnSpeed;
     yChange *= turnSpeed;
 
-    yaw += xChange;
-    pitch += yChange;
+    glm::quat rotation = transform->rotation;
 
-    // Clamp the pitch
-    if (pitch > 89.0f)
-    {
-        pitch = 89.0f;
-    }
+    // create rotation quaternion
+    glm::quat pitch = glm::angleAxis(glm::radians(yChange), transform->GetRight());
+    glm::quat yaw = glm::angleAxis(glm::radians(xChange), worldUp);
 
-    if (pitch < -89.0f)
-    {
-        pitch = -89.0f;
-    }
+    // apply rotation
+    rotation = glm::normalize(yaw * pitch * rotation);
 
-    update();
+    transform->SetRotation(rotation);
 }
 
-void Camera::update()
+void Camera::Draw(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw)
 {
-    GLfloat yawCos = cos(glm::radians(yaw));
-    GLfloat yawSin = sin(glm::radians(yaw));
-    GLfloat pitchCos = cos(glm::radians(pitch));
-    GLfloat pitchSin = sin(glm::radians(pitch));
+    // Set the projection matrix
+    shader.SetMat4("projection", projection);
 
-    // Calculate front vector
-    front.x = yawCos * pitchCos;
-    front.y = pitchSin;
-    front.z = yawSin * pitchCos;
+    // Set the view matrix
+    shader.SetMat4("view", calculateViewMatrix());
 
-    front = glm::normalize(front);
-
-    right = glm::normalize(glm::cross(front, worldUp));
-    up = glm::normalize(glm::cross(right, front));
+    // Set the camera position
+    shader.SetVec3("eyePos", getCameraPosition());
 }
 
 // TODO: Cache frustum planes
