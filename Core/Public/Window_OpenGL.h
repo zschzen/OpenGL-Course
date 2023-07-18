@@ -14,6 +14,7 @@ namespace Vosgi
     {
     public:
         Window_OpenGL(WindowHandle* windowHandle, GLint width, GLint height);
+        Window_OpenGL(WindowHandle* windowHandle);
         ~Window_OpenGL();
 
         int Initialize() override;
@@ -38,6 +39,9 @@ namespace Vosgi
         static void CharCallback(GLFWwindow* window, unsigned int codepoint);
 
         void SetClearColor(float r, float g, float b, float a);
+
+        // Getters
+        inline GLFWwindow* GetWindow() const { return window; }
 
     protected:
         GLFWwindow* window = nullptr;

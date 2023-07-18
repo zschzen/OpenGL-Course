@@ -11,7 +11,7 @@ namespace Vosgi
     class WindowHandle
     {
     public:
-        void virtual Draw(float deltaTime, unsigned int& displayCount, unsigned int& drawCount, unsigned int& entityCount) {}
+        void virtual Draw(float deltaTime, unsigned int &displayCount, unsigned int &drawCount, unsigned int &entityCount) {}
         void virtual KeyCallback(int key, int scancode, int action, int mods) {}
         void virtual MouseCallback(double xPos, double yPos) {}
         void virtual MouseButtonCallback(int button, int action, int mods) {}
@@ -30,6 +30,16 @@ namespace Vosgi
             aspectRatio = (GLfloat)width / (GLfloat)height;
         }
 
+        Window(WindowHandle *windowHandle)
+            : windowHandle(windowHandle)
+        {
+            width = 800;
+            height = 600;
+            bufferWidth = width;
+            bufferHeight = height;
+            aspectRatio = (GLfloat)width / (GLfloat)height;
+        }
+
         virtual int Initialize() = 0;
         virtual void Run() = 0;
         virtual void SwapBuffers() = 0;
@@ -39,7 +49,7 @@ namespace Vosgi
         virtual void CreateCallbacks() = 0;
 
         // Setters
-        virtual void SetWindowLabel(const char* label) = 0;
+        virtual void SetWindowLabel(const char *label) = 0;
         virtual void SetMouseEnabled(bool enabled) = 0;
 
         // Getters
@@ -48,14 +58,20 @@ namespace Vosgi
         inline GLint GetHeight() const { return height; }
         inline GLint GetBufferHeight() const { return bufferHeight; }
         inline GLfloat GetAspectRatio() const { return aspectRatio; }
-        inline WindowHandle* GetWindowHandle() const { return windowHandle; }
+        inline WindowHandle *GetWindowHandle() const { return windowHandle; }
         inline bool GetMouseEnabled() const { return m_mouseEnabled; }
 
         inline float GetDeltaTime() const { return deltaTime; }
 
+        // Calculate aspect ratio
+        virtual void CalculateAspectRatio()
+        {
+            aspectRatio = (GLfloat)width / (GLfloat)height;
+        }
+
     protected:
-        WindowHandle* windowHandle;
-        GLint width = 0, height = 0;
+        WindowHandle *windowHandle;
+        GLint width = 800, height = 600;
         GLint bufferWidth = 0, bufferHeight = 0;
         GLfloat aspectRatio = 0;
 

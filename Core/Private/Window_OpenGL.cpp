@@ -14,6 +14,9 @@ namespace Vosgi
     Window_OpenGL::Window_OpenGL(WindowHandle *windowHandle, GLint width, GLint height)
         : Window(windowHandle, width, height) {}
 
+    Window_OpenGL::Window_OpenGL(WindowHandle *windowHandle)
+        : Window(windowHandle) {}
+
     Window_OpenGL::~Window_OpenGL()
     {
         Terminate();
@@ -149,6 +152,7 @@ namespace Vosgi
             // Update the window
             windowHandle->Draw(deltaTime, displayCount, drawCount, entityCount);
 
+            # if 1
             // Draw FPS sampler
             ImGui::SetNextWindowPos(ImVec2(0, 0));
             ImGui::SetNextWindowSize(ImVec2(0, 0));
@@ -165,6 +169,7 @@ namespace Vosgi
             desiredFrameTime = 1.0 / maxFPS;
 
             ImGui::End();
+            # endif
 
             // Render ImGui
             ImGui::Render();
@@ -221,6 +226,9 @@ namespace Vosgi
     void Window_OpenGL::FramebufferSizeCallback(GLFWwindow *window, int width, int height)
     {
         glViewport(0, 0, width, height);
+        
+        Window* windowHandle = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+        windowHandle->CalculateAspectRatio();
     }
 
     void Window_OpenGL::KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
