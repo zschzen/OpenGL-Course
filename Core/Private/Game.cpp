@@ -18,6 +18,7 @@ namespace Vosgi
         // Create objects
         Entity* mainLightEntity = new Entity("Main Light", "Light");
         mainLightEntity->AddBehaviour<Light>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+        mainLightEntity->transform.SetRotation(glm::quat(glm::radians(glm::vec3(45.0f, 45.0f, 0.0f))));
 
         Entity* cameraEntity = new Entity("Camera", "Untagged");
         camera = cameraEntity->AddBehaviour<Camera>(glm::vec3(0.0f, 0.0f, 10.0f), 45, window->GetAspectRatio(), 0.1f, 1000.0f);
