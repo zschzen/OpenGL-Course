@@ -47,9 +47,8 @@ namespace Vosgi
         GLfloat xChange = 0, yChange = 0;
         bool mouseFirstMoved = true;
 
-        Camera camera;
-        Light mainLight = Light(1.0f, 1.0f, 1.0f, 1.0f, 0.5f, 0.0f, 0.0f, 1.0f);
-        Material shinyMaterial = Material(1.0f, 32);
+        Camera* camera;
+        Material shinyMaterial;
 
         std::vector<std::unique_ptr<Entity>> entities = std::vector<std::unique_ptr<Entity>>();
     };

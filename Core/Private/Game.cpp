@@ -1,10 +1,9 @@
 #include "../Public/Game.h"
 
-#
-
 #include <imgui/imgui.h>
 
 #include "../Public/Shader.h"
+#include "../Public/Rotating.h"
 
 namespace Vosgi
 {
@@ -13,19 +12,25 @@ namespace Vosgi
         window = new Window_OpenGL(reinterpret_cast<WindowHandle *>(this), (GLfloat)800, (GLfloat)600);
         window->Initialize();
 
-        camera = Camera(glm::vec3(0.0f, 0.0f, -10.0f), 45, window->GetAspectRatio(), 0.1f, 100.0f);
         shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
+        shinyMaterial = Material(0.5f, 32.0f);
 
         // Create objects
-        Entity *entity1 = new Entity("Flower", "Untagged");
-        Entity *entity2 = new Entity("Flower (1)", "Untagged");
-        entity1->AddBehaviour<Model>("Models/flower/flower.obj");
-        entity2->AddBehaviour<Model>("Models/flower/flower.obj");
-        entity1->transform.SetLocalScale(glm::vec3(1.0f, 1.0f, 1.0f));
-        entity2->transform.SetLocalPosition(glm::vec3(15.0f, 0.0f, 0.0f));
-        entity2->transform.SetLocalScale(glm::vec3(.5f, .5f, .5f));
-        entity1->AddChild(std::unique_ptr<Entity>(entity2));
-        entities.push_back(std::unique_ptr<Entity>(entity1));
+        Entity* mainLightEntity = new Entity("Main Light", "Light");
+        mainLightEntity->AddBehaviour<Light>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+
+        Entity* cameraEntity = new Entity("Camera", "Untagged");
+        camera = cameraEntity->AddBehaviour<Camera>(glm::vec3(0.0f, 0.0f, 10.0f), 45, window->GetAspectRatio(), 0.1f, 1000.0f);
+
+        Entity* flowerEntity = new Entity("Flower", "Untagged");
+
+        flowerEntity->AddBehaviour<Model>("Models/flower/flower.obj");
+        flowerEntity->AddBehaviour<Rotating>();
+        flowerEntity->transform.SetLocalScale(glm::vec3(1.0f, 1.0f, 1.0f));
+
+        entities.push_back(std::unique_ptr<Entity>(cameraEntity));
+        entities.push_back(std::unique_ptr<Entity>(mainLightEntity));
+        entities.push_back(std::unique_ptr<Entity>(flowerEntity));
     }
 
     Game::~Game()
@@ -39,49 +44,78 @@ namespace Vosgi
         window->Run();
     }
 
-    void Game::Draw(float deltaTime, unsigned int& displayCount, unsigned int& drawCount, unsigned int& entityCount)
+    void Game::Draw(float deltaTime, unsigned int &displayCount, unsigned int &drawCount, unsigned int &entityCount)
     {
-        camera.keyControl(keys, deltaTime);
+        camera->keyControl(keys, deltaTime);
 
         shader->Use();
 
-        shader->SetMat4("projection", camera.getProjectionMatrix());
-        shader->SetMat4("view", camera.calculateViewMatrix());
-        shader->SetVec3("eyePos", camera.getCameraPosition());
-
-        mainLight.Use(*shader);
         shinyMaterial.Use(*shader);
 
-        Frustum frustum = camera.getFrustum();
+        Frustum frustum = camera->getFrustum();
 
         for (auto &entity : entities)
         {
-            entity->DrawSelfAndChildren(frustum, *shader, displayCount, drawCount, entityCount);
+            entity->DrawSelfAndChildren(deltaTime, frustum, *shader, displayCount, drawCount, entityCount);
         }
 
         // Draw rendering controls
+        Light &mainLight = *entities[1]->GetBehaviour<Light>();
         ImGui::Begin("Light");
         ImGui::ColorEdit3("Light Color", glm::value_ptr(mainLight.color));
-        ImGui::DragFloat3("Light Position", glm::value_ptr(mainLight.direction), 0.01f, -1.0f, 1.0f);
         ImGui::SliderFloat("Ambient Intensity", &mainLight.ambientIntensity, 0.0f, 1.0f);
         ImGui::SliderFloat("Diffuse Intensity", &mainLight.diffuseIntensity, 0.0f, 1.0f);
         ImGui::SliderFloat("Specular Intensity", &shinyMaterial.specularIntensity, 0.0f, 1.0f);
         ImGui::SliderFloat("Shininess", &shinyMaterial.shininess, 1.0f, 256.0f);
         ImGui::Separator();
-        ImGui::Text("FOV: %f", camera.getFov());
+        ImGui::Text("FOV: %f", camera->getFov());
         ImGui::End();
 
-        // Draw entity controls
-        ImGui::Begin("Entities");
+        // Draw hierarchy
+        ImGui::Begin("Hierarchy");
         for (auto &entity : entities)
         {
+            ImGui::Checkbox(("##" + entity->GetGUID()).c_str(), &entity->enabled);
+            ImGui::SameLine();
             if (ImGui::CollapsingHeader((entity->name + " (" + entity->GetGUID() + ")").c_str()))
             {
-                ImGui::Checkbox("Active", &entity->active);
-                ImGui::SliderFloat3("Position", (float *)&entity->transform.m_localPosition, -100.0f, 100.0f);
-                ImGui::SliderFloat3("Rotation", (float *)&entity->transform.m_localEulerRotation, -180.0f, 180.0f);
-                ImGui::SliderFloat3("Scale", (float *)&entity->transform.m_localScale, 0.0f, 100.0f);
-                entity->transform.SetDirty();
+                //ImGui::SameLine();
+                ImGui::Text("Tag: %s", entity->tag.c_str());
+                ImGui::Separator();
+                if (ImGui::CollapsingHeader("Transform"))
+                {
+                    ImGui::SliderFloat3("Position", (float *)&entity->transform.position, -100.0f, 100.0f);
+                    
+                    // Retrieve the Euler angles in degrees
+                    glm::vec3 eulerDegrees = entity->transform.rotation.GetEulerAnglesDegrees();
+                    // Create a Float3 widget to edit the Euler angles
+                    if (ImGui::SliderFloat3("Rotation", (float *)&eulerDegrees, -180.0f, 180.0f))
+                    {
+                        // Set the Euler angles in degrees
+                        entity->transform.rotation.SetEulerAngles(glm::radians(eulerDegrees));
+                        entity->transform.SetDirty();
+                    }
+
+
+                    ImGui::SliderFloat3("Scale", (float *)&entity->transform.localScale, 0.0f, 100.0f);
+                    entity->transform.SetDirty();
+                }
+                ImGui::Separator();
+                for (auto &behaviour : entity->GetBehaviours())
+                {
+                    // Get the type name of the behaviour
+                    std::string typeName = typeid(*behaviour).name();
+                    // cut any numbers from the start of the string
+                    typeName = typeName.substr(typeName.find_first_not_of("0123456789"));
+
+                    ImGui::Checkbox(("##" + typeName).c_str(), &behaviour->m_isActive);
+                    ImGui::SameLine();
+                    if (ImGui::CollapsingHeader(typeName.c_str()))
+                    {
+                        ImGui::Text("Type: %s", typeName.c_str());
+                    }
+                    ImGui::Separator();
+                }
             }
         }
         ImGui::End();
@@ -130,17 +164,18 @@ namespace Vosgi
         lastX = (GLfloat)xPos;
         lastY = (GLfloat)yPos;
 
-        camera.mouseControl(xChange, yChange);
+        camera->mouseControl(xChange, yChange);
     }
 
     void Game::ScrollCallback(double xOffset, double yOffset)
     {
-        if (!window->GetMouseEnabled()) return;
+        if (!window->GetMouseEnabled())
+            return;
 
         // control camera fov
-        float fov = camera.getFov() - static_cast<float>(yOffset);
+        float fov = camera->getFov() - static_cast<float>(yOffset);
         fov = glm::clamp(fov, 1.0f, 120.0f);
-        camera.setFov(fov);
+        camera->setFov(fov);
     }
 
 }
