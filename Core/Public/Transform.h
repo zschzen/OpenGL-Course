@@ -7,6 +7,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Quaternion.h"
+
 namespace Vosgi
 {
     class Transform
@@ -14,45 +16,83 @@ namespace Vosgi
     public:
         // Constructors
         Transform();
-        Transform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
+        Transform(glm::vec3 pos, glm::quat rot, glm::vec3 scale);
 
         // Getters
-        const glm::mat4& GetModel() const { return m_model; }
-
-        // Position
-        const glm::vec3& GetLocalPosition() const { return m_localPosition; }
-        glm::vec3 GetWorldPosition() const { return glm::vec3(m_model[3]); }
-
-        // Rotation
-        const glm::vec3& GetLocalRotation() const { return m_localEulerRotation; }
-        glm::vec3 GetWorldRotation() const { return glm::vec3(glm::eulerAngles(glm::quat_cast(m_model))); }
-
-        // Scale
-        const glm::vec3& GetLocalScale() const { return m_localScale; }
-        glm::vec3 GetWorldScale() const { return { glm::length(GetRight()), glm::length(GetUp()), glm::length(GetBack()) }; }
+        const glm::mat4 &GetModel() const { return m_model; }
 
         // Directions
-        glm::vec3 GetForward() const { return glm::vec3(-m_model[2]); }
-        glm::vec3 GetBack() const { return glm::vec3(m_model[2]); }
-        glm::vec3 GetLeft() const { return glm::vec3(-m_model[0]); }
-        glm::vec3 GetRight() const { return glm::vec3(m_model[0]); }
-        glm::vec3 GetUp() const { return glm::vec3(m_model[1]); }
-        glm::vec3 GetDown() const { return glm::vec3(-m_model[1]); }
+        glm::vec3 GetForward() const { return rotation * glm::vec3(0.0f, 0.0f, -1.0f); }
+        glm::vec3 GetRight() const { return rotation * glm::vec3(1.0f, 0.0f, 0.0f); }
+        glm::vec3 GetUp() const { return rotation * glm::vec3(0.0f, 1.0f, 0.0f); }
+
+        // Getters
+        glm::vec3 GetWorldScale() const { return glm::vec3(glm::length(GetRight()), glm::length(GetUp()), glm::length(GetForward())); }
 
         // Setters
+        void SetPosition(glm::vec3 pos)
+        {
+            position = pos;
+            m_isDirty = true;
+        }
+
         void SetLocalPosition(glm::vec3 pos)
         {
-            m_localPosition = pos;
+            localPosition = pos;
             m_isDirty = true;
         }
-        void SetLocalRotation(glm::vec3 rot)
+
+        void SetRotation(glm::quat rotation)
         {
-            m_localEulerRotation = rot;
+            this->rotation = rotation;
             m_isDirty = true;
         }
+
+        void SetLocalRotation(glm::quat rotation)
+        {
+            localRotation = rotation;
+            m_isDirty = true;
+        }
+
         void SetLocalScale(glm::vec3 scale)
         {
-            m_localScale = scale;
+            localScale = scale;
+            m_isDirty = true;
+        }
+
+        void SetForward(glm::vec3 forward)
+        {
+            glm::vec3 newForward = glm::normalize(forward);
+            glm::vec3 currentForward = GetForward();
+
+            float angle = glm::acos(glm::dot(currentForward, newForward));
+            glm::vec3 axis = glm::cross(currentForward, newForward);
+
+            rotation = glm::angleAxis(angle, axis);
+            m_isDirty = true;
+        }
+
+        void SetUp(glm::vec3 up)
+        {
+            glm::vec3 newUp = glm::normalize(up);
+            glm::vec3 currentUp = GetUp();
+
+            float angle = glm::acos(glm::dot(currentUp, newUp));
+            glm::vec3 axis = glm::cross(currentUp, newUp);
+
+            rotation = glm::angleAxis(angle, axis);
+            m_isDirty = true;
+        }
+
+        void SetRight(glm::vec3 right)
+        {
+            glm::vec3 newRight = glm::normalize(right);
+            glm::vec3 currentRight = GetRight();
+
+            float angle = glm::acos(glm::dot(currentRight, newRight));
+            glm::vec3 axis = glm::cross(currentRight, newRight);
+
+            rotation = glm::angleAxis(angle, axis);
             m_isDirty = true;
         }
 
@@ -69,9 +109,13 @@ namespace Vosgi
 
     public:
         // Member variables
-        glm::vec3 m_localPosition = { 0.0f, 0.0f, 0.0f };
-        glm::vec3 m_localEulerRotation = { 0.0f, 0.0f, 0.0f };
-        glm::vec3 m_localScale = { 1.0f, 1.0f, 1.0f };
+        glm::vec3 position = {0.0f, 0.0f, 0.0f};
+        glm::vec3 localPosition = {0.0f, 0.0f, 0.0f};
+
+        Quaternion rotation = Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
+        Quaternion localRotation = Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
+
+        glm::vec3 localScale = {1.0f, 1.0f, 1.0f};
 
     protected:
         glm::mat4 m_model = glm::mat4(1.0f);

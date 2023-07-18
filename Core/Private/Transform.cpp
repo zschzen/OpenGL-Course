@@ -1,29 +1,19 @@
 #include "../Public/Transform.h"
-
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <stdio.h>
 
 namespace Vosgi
 {
     Transform::Transform()
     {
-        m_localPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-        m_localEulerRotation = glm::vec3(0.0f, 0.0f, 0.0f);
-        m_localScale = glm::vec3(1.0f, 1.0f, 1.0f);
-
-        m_model = glm::mat4(1.0f);
-
-        m_isDirty = true;
     }
 
-    Transform::Transform(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
+    Transform::Transform(glm::vec3 pos, glm::quat rot, glm::vec3 scale)
     {
-        m_localPosition = pos;
-        m_localEulerRotation = rot;
-        m_localScale = scale;
-
-        m_model = glm::mat4(1.0f);
-
-        m_isDirty = true;
+        position = pos;
+        rotation = rot;
+        localScale = scale;
     }
 
     Transform::~Transform()
@@ -32,15 +22,11 @@ namespace Vosgi
 
     glm::mat4 Transform::GetLocalModelMatrix() const
     {
-        const glm::mat4 transformX = glm::rotate(glm::mat4(1.0f), glm::radians(m_localEulerRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-        const glm::mat4 transformY = glm::rotate(glm::mat4(1.0f), glm::radians(m_localEulerRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-        const glm::mat4 transformZ = glm::rotate(glm::mat4(1.0f), glm::radians(m_localEulerRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+        glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), position);
+        glm::mat4 rotationMatrix = static_cast<glm::mat4>(rotation);
+        glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), localScale);
 
-        // Y * X * Z
-        const glm::mat4 rotationMatrix = transformY * transformX * transformZ;
-
-        // translation * rotation * scale (also know as TRS matrix)
-        return glm::translate(glm::mat4(1.0f), m_localPosition) * rotationMatrix * glm::scale(glm::mat4(1.0f), m_localScale);
+        return translationMatrix * rotationMatrix * scaleMatrix;
     }
 
     void Transform::ComputeModelMatrix()
