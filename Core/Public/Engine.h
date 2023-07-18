@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "Game.h"
-
 namespace Vosgi
 {
     class Engine
@@ -13,6 +11,7 @@ namespace Vosgi
         Engine();
         ~Engine();
 
+        void RunEditor();
         void Run();
     };
 } // namespace Vosgi
