@@ -71,9 +71,9 @@ namespace Vosgi
         }
     }
 
-    void Entity::DrawSelfAndChildren(const Frustum &frustum, Shader &shader, unsigned int &display, unsigned int &draw, unsigned int &total)
+    void Entity::DrawSelfAndChildren(float deltaTime, const Frustum &frustum, Shader &shader, unsigned int &display, unsigned int &draw, unsigned int &total)
     {
-        if (!active) return;
+        if (!enabled) return;
 
         UpdateSelfAndChildren();
 
@@ -81,16 +81,16 @@ namespace Vosgi
         {
             if (!component->IsActive()) continue;
 
-            component->Update(0.0f);
+            component->Update(deltaTime);
             // ...
-            component->LateUpdate(0.0f);
+            component->LateUpdate(deltaTime);
             component->Draw(frustum, shader, display, draw);
         }
         total++;
 
         for (auto &child : children)
         {
-            child->DrawSelfAndChildren(frustum, shader, display, draw, total);
+            child->DrawSelfAndChildren(deltaTime, frustum, shader, display, draw, total);
         }
     }
 }

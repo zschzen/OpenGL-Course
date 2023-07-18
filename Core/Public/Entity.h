@@ -27,6 +27,11 @@ namespace Vosgi
         void RemoveChild(Entity* child);
         void RemoveChild(size_t index);
 
+        // Getters and Setters
+        std::list<std::unique_ptr<Entity>>& GetChildren() { return children; }
+        std::string GetGUID() const { return GUID; }
+        std::list<std::unique_ptr<Behaviour>>& GetBehaviours() { return behaviours; }
+
         /* Add a behaviour to this entity. */
         template <typename T, typename... Args>
         T* AddBehaviour(Args&&... args)
@@ -82,24 +87,21 @@ namespace Vosgi
         void UpdateSelfAndChildren();
         void ForceUpdateSelfAndChildren();
 
-        void DrawSelfAndChildren(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw, unsigned int& total);
-
-        // Getters and Setters
-        std::string GetGUID() const { return GUID; }
+        void DrawSelfAndChildren(float deltaTime, const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw, unsigned int& total);
 
     public:
         std::string name = "New Entity";
         std::string tag = "Untagged";
         Transform transform = Transform();
 
-        bool active = true;
+        bool enabled = true;
 
     private:
-        std::list<std::unique_ptr<Entity>> children;
-        std::list<std::unique_ptr<Behaviour>> behaviours;
+        std::list<std::unique_ptr<Entity>> children = std::list<std::unique_ptr<Entity>>();
+        std::list<std::unique_ptr<Behaviour>> behaviours = std::list<std::unique_ptr<Behaviour>>();
         Entity* parent = nullptr;
 
-        std::string GUID;
+        std::string GUID = std::string();
     };
 } // namespace Vosgi
 
