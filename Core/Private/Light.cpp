@@ -2,28 +2,26 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
+#include "../Public/Frustum.h"
 #include "../Public/Shader.h"
 
-Light::Light()
+Light::Light() : Behaviour()
 {
 }
 
-Light::Light(GLfloat red, GLfloat green, GLfloat blue, GLfloat aIntensity,
-    GLfloat xDir, GLfloat yDir, GLfloat zDir, GLfloat dIntensity)
+Light::Light(GLfloat red, GLfloat green, GLfloat blue, GLfloat aIntensity, GLfloat dIntensity) : Behaviour()
 {
     color = glm::vec3(red, green, blue);
     ambientIntensity = aIntensity;
-
-    direction = glm::vec3(xDir, yDir, zDir);
     diffuseIntensity = dIntensity;
 }
 
-void Light::Use(Shader& shader)
+void Light::Draw(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw)
 {
     shader.SetVec3("directionalLight.colour", color);
     shader.SetFloat("directionalLight.ambientIntensity", ambientIntensity);
 
-    shader.SetVec3("directionalLight.direction", direction);
+    shader.SetVec3("directionalLight.direction", transform->rotation);
     shader.SetFloat("directionalLight.diffuseIntensity", diffuseIntensity);
 }
 

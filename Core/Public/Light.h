@@ -6,24 +6,25 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
+#include "Behaviour.h"
+
 // Forward declaration
 class Shader;
+struct Sphere;
 
-class Light
+class Light : public Vosgi::Behaviour
 {
 public:
     Light();
-    Light(GLfloat red, GLfloat green, GLfloat blue, GLfloat aIntensity,
-          GLfloat xDir, GLfloat yDir, GLfloat zDir, GLfloat dIntensity);
+    Light(GLfloat red, GLfloat green, GLfloat blue, GLfloat aIntensity, GLfloat dIntensity);
 
-    void Use(Shader& shader);
+    void Draw(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw) override;
 
     ~Light();
 
     glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
-    GLfloat ambientIntensity = 1.0f;
 
-    glm::vec3 direction = glm::vec3(0.0f, -1.0f, 0.0f);
+    GLfloat ambientIntensity = 1.0f;
     GLfloat diffuseIntensity = 1.0f;
 };
 
