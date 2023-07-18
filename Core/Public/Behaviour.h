@@ -33,10 +33,9 @@ namespace Vosgi
         inline bool IsActive() const { return m_isActive; }
 
     //protected:
-        Entity *entity = nullptr;
-        Vosgi::Transform *transform = nullptr;
+        Entity* entity = nullptr;
+        Vosgi::Transform* transform = nullptr;
 
-    protected:
         bool m_isActive = true;
     };
 }
