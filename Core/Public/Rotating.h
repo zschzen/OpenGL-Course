@@ -6,6 +6,7 @@ class Rotating : public Vosgi::Behaviour
 {
 public:
     Rotating() : Behaviour() {}
+    Rotating(float speed) : Behaviour(), speed(speed) {}
     ~Rotating() {}
 
     // rotate the object around the Y-axis using quaternions angle-axis rotation

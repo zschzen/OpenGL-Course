@@ -31,6 +31,7 @@ class Model : public Vosgi::Behaviour
 public:
     Model();
     Model(const char* path);
+    Model(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
     ~Model();
 
     void Render(Shader& shader, unsigned int& draw);

@@ -1,5 +1,9 @@
 #include "../Public/Shader.h"
 
+// initialize static map of shaders
+std::map<std::string, GLuint> Shader::uniformLocations = std::map<std::string, GLuint>();
+std::vector<Shader*> Shader::shaders = std::vector<Shader*>();
+
 Shader::Shader()
 {
     shaderID = 0;
@@ -8,11 +12,17 @@ Shader::Shader()
 Shader::Shader(const char* vertexLocation, const char* fragmentLocation)
 {
     CreateFromFiles(vertexLocation, fragmentLocation);
+
+    // Add to static map of shaders
+    shaders.push_back(this);
 }
 
 void Shader::CreateFromString(const char* vertexCode, const char* fragmentCode)
 {
     CompileShader(vertexCode, fragmentCode);
+
+    // Add to static map of shaders
+    shaders.push_back(this);
 }
 
 void Shader::CreateFromFiles(const char* vertexLocation, const char* fragmentLocation)
@@ -90,6 +100,11 @@ GLuint Shader::GetUniformLocation(const char* name)
     GLuint location = glGetUniformLocation(shaderID, name);
     uniformLocations[name] = location;
     return location;
+}
+
+void Shader::SetBool(const char* name, bool value)
+{
+    SetInt(name, static_cast<int>(value));
 }
 
 void Shader::SetInt(const char* name, int value)
@@ -172,5 +187,8 @@ std::string Shader::GetAbsolutePath(const char* fileLocation)
 
 Shader::~Shader()
 {
+    // Remove from static map of shaders
+    shaders.erase(std::remove(shaders.begin(), shaders.end(), this), shaders.end());
+
 	Clear();
 }

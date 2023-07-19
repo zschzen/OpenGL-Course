@@ -19,6 +19,8 @@
 class Entity;
 class Shader;
 class PointLight;
+class SpotLight;
+class DirectionalLight;
 
 namespace Vosgi
 {
@@ -49,7 +51,9 @@ namespace Vosgi
 
         Camera* camera;
         Material shinyMaterial;
+        DirectionalLight* directionalLight;
         PointLight* pointLight;
+        SpotLight* spotLight;
 
         std::vector<std::unique_ptr<Entity>> entities = std::vector<std::unique_ptr<Entity>>();
     };

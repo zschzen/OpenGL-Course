@@ -10,16 +10,30 @@ namespace Vosgi
     {
         name = std::string("New Entity");
         tag = std::string("Untagged");
-        GUID = RandomGUID(5);
+        GUID = RandomGUID(8);
+
+        AssignEvents();
     }
 
     Entity::Entity(std::string name, std::string tag)
-        : name(name), tag(tag), GUID(RandomGUID(5))
+        : name(name), tag(tag), GUID(RandomGUID(8))
     {
+        AssignEvents();
     }
 
     Entity::~Entity()
     {
+        for (auto &behaviour : behaviours)
+        {
+            behaviour->Terminate();
+        }
+        behaviours.clear();
+
+        for (auto &child : children)
+        {
+            child->~Entity();
+        }
+        children.clear();
     }
 
     void Entity::AddChild(std::unique_ptr<Entity> child)
@@ -71,15 +85,34 @@ namespace Vosgi
         }
     }
 
+    void Entity::SetEnabled(bool value)
+    {
+        enabled = value;
+
+        // Propagate to behaviours
+        for (auto &behaviour : behaviours)
+        {
+            behaviour->enabled = value;
+        }
+
+        // Propagate to children
+        for (auto &child : children)
+        {
+            child->SetEnabled(value);
+        }
+    }
+
     void Entity::DrawSelfAndChildren(float deltaTime, const Frustum &frustum, Shader &shader, unsigned int &display, unsigned int &draw, unsigned int &total)
     {
-        if (!enabled) return;
+        if (!enabled)
+            return;
 
         UpdateSelfAndChildren();
 
-        for (auto& component : behaviours)
+        for (auto &component : behaviours)
         {
-            if (!component->IsActive()) continue;
+            if (!component->IsActive())
+                continue;
 
             component->Update(deltaTime);
             // ...
@@ -93,4 +126,10 @@ namespace Vosgi
             child->DrawSelfAndChildren(deltaTime, frustum, shader, display, draw, total);
         }
     }
+
+    void Entity::AssignEvents()
+    {
+        enabled.Subscribe(MakeMethodPointer(this, &Entity::SetEnabled));
+    }
+
 }

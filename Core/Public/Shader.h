@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <vector>
 
 #include <GL/glew.h>
 
@@ -22,6 +23,7 @@ public:
 
     std::string ReadFile(const char* fileLocation);
 
+    void SetBool(const char* name, bool value);
     void SetInt(const char* name, int value);
     void SetFloat(const char* name, float value);
     void SetVec3(const char* name, glm::vec3 value);
@@ -48,9 +50,17 @@ private:
 private:
     std::string GetAbsolutePath(const char* fileLocation);
 
+private:
+    // static list of all shaders
+    static std::vector<Shader*> shaders;
+
     // Map of all uniform locations
-    std::map<std::string, GLuint> uniformLocations = std::map<std::string, GLuint>();
+    static std::map<std::string, GLuint> uniformLocations;
+
+public:
+    // Get the sahders in a list
+    static std::vector<Shader*> GetShaders() { return shaders; }
 
     // Check if a uniform location is already cached
-    inline bool IsCached(const char* name) const { return uniformLocations.find(name) != uniformLocations.end(); }
+    static inline bool IsCached(const char* name) { return uniformLocations.find(name) != uniformLocations.end(); }
 };

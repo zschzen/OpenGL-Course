@@ -13,6 +13,7 @@
 #include "Model.h"
 #include "Behaviour.h"
 #include "BoundingVolume.h"
+#include "Observable.h"
 
 namespace Vosgi
 {
@@ -27,6 +28,8 @@ namespace Vosgi
         void RemoveChild(Entity* child);
         void RemoveChild(size_t index);
 
+        void SetEnabled(bool value);
+
         // Getters and Setters
         std::list<std::unique_ptr<Entity>>& GetChildren() { return children; }
         std::string GetGUID() const { return GUID; }
@@ -39,6 +42,7 @@ namespace Vosgi
             static_assert(std::is_base_of<Behaviour, T>::value, "Must be derived from Behaviour");
             T* behaviour = new T(std::forward<Args>(args)...);
             behaviour->transform = &transform;
+            behaviour->OnEnable();
             behaviours.push_back(std::unique_ptr<T>(behaviour));
             return behaviour;
         }
@@ -94,7 +98,7 @@ namespace Vosgi
         std::string tag = "Untagged";
         Transform transform = Transform();
 
-        bool enabled = true;
+        Observable<bool> enabled = true;
 
     private:
         std::list<std::unique_ptr<Entity>> children = std::list<std::unique_ptr<Entity>>();
@@ -102,6 +106,9 @@ namespace Vosgi
         Entity* parent = nullptr;
 
         std::string GUID = std::string();
+
+    private:
+        void AssignEvents();
     };
 } // namespace Vosgi
 

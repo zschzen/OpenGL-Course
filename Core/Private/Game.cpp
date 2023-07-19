@@ -6,6 +6,7 @@
 #include "../Public/Rotating.h"
 #include "../Public/DirectionalLight.h"
 #include "../Public/PointLight.h"
+#include "../Public/SpotLight.h"
 
 namespace Vosgi
 {
@@ -18,21 +19,52 @@ namespace Vosgi
         shinyMaterial = Material(0.5f, 32.0f);
 
         // Create objects
-        Entity* mainLightEntity = new Entity("Main Light", "Light");
-        mainLightEntity->AddBehaviour<DirectionalLight>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+        Entity *mainLightEntity = new Entity("Main Light", "Light");
+        directionalLight = mainLightEntity->AddBehaviour<DirectionalLight>(.5f, .5f, .5f, 1.0f, 1.0f);
         mainLightEntity->transform.SetRotation(glm::quat(glm::radians(glm::vec3(45.0f, 45.0f, 0.0f))));
 
         // point light
-        Entity* pointLightEntity = new Entity("Point Light", "Light");
+        Entity *pointLightEntity = new Entity("Point Light", "Light");
         pointLight = pointLightEntity->AddBehaviour<PointLight>(1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.1f, 0.1f, 0.1f);
         pointLight->color = glm::vec3(0.0f, 0.0f, 1.0f);
-        pointLightEntity->transform.SetPosition(glm::vec3(0.0f, 0.0f, 2.0f));
+        pointLightEntity->transform.SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
 
-        Entity* cameraEntity = new Entity("Camera", "Untagged");
+        // second point light
+        Entity *pointLightEntity2 = new Entity("Point Light 2", "Light");
+        PointLight *pointLight2 = pointLightEntity2->AddBehaviour<PointLight>(1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.1f, 0.1f, 0.1f);
+        pointLight2->color = glm::vec3(0.0f, 1.0f, 0.0f);
+        pointLightEntity2->transform.SetPosition(glm::vec3(0.0f, 0.0f, -10.0f));
+
+        // third point light
+        Entity *pointLightEntity3 = new Entity("Point Light 3", "Light");
+        PointLight *pointLight3 = pointLightEntity3->AddBehaviour<PointLight>(1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.1f, 0.1f, 0.1f);
+        pointLight3->color = glm::vec3(1.0f, 0.0f, 0.0f);
+        pointLightEntity3->transform.SetPosition(glm::vec3(10.0f, 0.0f, 0.0f));
+
+        // point light parent
+        Entity *pointLightParent = new Entity("Point Light Parent", "Light");
+        pointLightParent->transform.SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+        pointLightParent->AddChild(std::unique_ptr<Entity>(pointLightEntity));
+        pointLightParent->AddChild(std::unique_ptr<Entity>(pointLightEntity2));
+        pointLightParent->AddChild(std::unique_ptr<Entity>(pointLightEntity3));
+
+        // spot light
+        Entity *spotLightEntity = new Entity("Spot Light", "Light");
+        spotLight = spotLightEntity->AddBehaviour<SpotLight>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.1f, 0.1f, 0.1f, 12.5f);
+        spotLightEntity->transform.SetPosition(glm::vec3(0.0f, 8.0f, -15.0f));
+        spotLightEntity->transform.SetRotation(glm::quat(glm::radians(glm::vec3(-90.0f, 0.0f, 0.0f))));
+
+        Entity *cameraEntity = new Entity("Main Camera", "MainCamera");
         camera = cameraEntity->AddBehaviour<Camera>(glm::vec3(0.0f, 0.0f, 10.0f), 45, window->GetAspectRatio(), 0.1f, 1000.0f);
 
-        Entity* flowerEntity = new Entity("Flower", "Untagged");
+        // Floor
+        Entity *floorEntity = new Entity("Floor", "Untagged");
+        floorEntity->AddBehaviour<Model>("Models/Floor/Floor.obj");
+        floorEntity->transform.SetPosition(glm::vec3(0.0f, -25.0f, 0.0f));
+        floorEntity->transform.SetLocalScale(glm::vec3(10.0f, 10.0f, 10.0f));
 
+        // Flower
+        Entity *flowerEntity = new Entity("Flower", "Untagged");
         flowerEntity->AddBehaviour<Model>("Models/flower/flower.obj");
         flowerEntity->AddBehaviour<Rotating>();
         flowerEntity->transform.SetPosition(glm::vec3(0.0f, -5.0f, -15.0f));
@@ -40,8 +72,10 @@ namespace Vosgi
 
         entities.push_back(std::unique_ptr<Entity>(cameraEntity));
         entities.push_back(std::unique_ptr<Entity>(mainLightEntity));
-        entities.push_back(std::unique_ptr<Entity>(pointLightEntity));
+        entities.push_back(std::unique_ptr<Entity>(pointLightParent));
+        entities.push_back(std::unique_ptr<Entity>(spotLightEntity));
         entities.push_back(std::unique_ptr<Entity>(flowerEntity));
+        entities.push_back(std::unique_ptr<Entity>(floorEntity));
     }
 
     Game::~Game()
@@ -70,12 +104,14 @@ namespace Vosgi
             entity->DrawSelfAndChildren(deltaTime, frustum, *shader, displayCount, drawCount, entityCount);
         }
 
+        // Unbind shader
+        glUseProgram(0);
+
         // Draw rendering controls
-        Light &mainLight = *entities[1]->GetBehaviour<Light>();
         ImGui::Begin("Light");
-        ImGui::ColorEdit3("Light Color", glm::value_ptr(mainLight.color));
-        ImGui::SliderFloat("Ambient Intensity", &mainLight.ambientIntensity, 0.0f, 1.0f);
-        ImGui::SliderFloat("Diffuse Intensity", &mainLight.diffuseIntensity, 0.0f, 1.0f);
+        ImGui::ColorEdit3("Light Color", glm::value_ptr(directionalLight->color));
+        ImGui::SliderFloat("Ambient Intensity", &directionalLight->ambientIntensity, 0.0f, 1.0f);
+        ImGui::SliderFloat("Diffuse Intensity", &directionalLight->diffuseIntensity, 0.0f, 1.0f);
         ImGui::SliderFloat("Specular Intensity", &shinyMaterial.specularIntensity, 0.0f, 1.0f);
         ImGui::SliderFloat("Shininess", &shinyMaterial.shininess, 1.0f, 256.0f);
         ImGui::Separator();
@@ -87,59 +123,86 @@ namespace Vosgi
         ImGui::SliderFloat("Constant", &pointLight->constant, 0.0f, 1.0f);
         ImGui::SliderFloat("Linear", &pointLight->linear, 0.0f, 1.0f);
         ImGui::SliderFloat("Quadratic", &pointLight->quadratic, 0.0f, 1.0f);
+        ImGui::Separator();
+        // spot light
+        ImGui::Text("Spot Light");
+        ImGui::ColorEdit3("1Color", glm::value_ptr(spotLight->color));
+        ImGui::SliderFloat("1Intensity", &spotLight->ambientIntensity, 0.0f, 1.0f);
+        ImGui::SliderFloat("1Diffuse", &spotLight->diffuseIntensity, 0.0f, 1.0f);
+        ImGui::SliderFloat("1Constant", &spotLight->constant, 0.0f, 1.0f);
+        ImGui::SliderFloat("1Linear", &spotLight->linear, 0.0f, 1.0f);
+        ImGui::SliderFloat("1Quadratic", &spotLight->quadratic, 0.0f, 1.0f);
+        ImGui::SliderFloat("1Edge", &spotLight->edge, 0.0f, 90.0f);
+        ImGui::Separator();
         ImGui::End();
 
         // Draw hierarchy
         ImGui::Begin("Hierarchy");
         for (auto &entity : entities)
         {
-            ImGui::Checkbox(("##" + entity->GetGUID()).c_str(), &entity->enabled);
-            ImGui::SameLine();
-            if (ImGui::CollapsingHeader((entity->name + " (" + entity->GetGUID() + ")").c_str()))
+            ImGui::PushID((void *)entity.get());
+            bool isEnabled = entity->enabled;
+            if (ImGui::Checkbox(("##" + entity->name).c_str(), &isEnabled))
             {
-                //ImGui::SameLine();
+                entity->enabled = isEnabled;
+            }
+            ImGui::SameLine();
+            if (ImGui::CollapsingHeader(entity->name.c_str()))
+            {
+                // ImGui::SameLine();
                 ImGui::Text("Tag: %s", entity->tag.c_str());
+                ImGui::Text("GUID: %s", entity->GetGUID().c_str());
+                ImGui::Text("Forward: (%f, %f, %f)", entity->transform.GetForward().x, entity->transform.GetForward().y, entity->transform.GetForward().z);
                 ImGui::Separator();
-                if (ImGui::CollapsingHeader("Transform"))
+
+                // Transform
+                ImGui::SliderFloat3("Position", (float *)&entity->transform.position, -100.0f, 100.0f);
+
+                // Retrieve the Euler angles in degrees
+                glm::vec3 eulerDegrees = entity->transform.rotation.GetEulerAnglesDegrees();
+                // Create a Float3 widget to edit the Euler angles
+                if (ImGui::SliderFloat3("Rotation", (float *)&eulerDegrees, -180.0f, 180.0f))
                 {
-                    ImGui::SliderFloat3("Position", (float *)&entity->transform.position, -100.0f, 100.0f);
-                    
-                    // Retrieve the Euler angles in degrees
-                    glm::vec3 eulerDegrees = entity->transform.rotation.GetEulerAnglesDegrees();
-                    // Create a Float3 widget to edit the Euler angles
-                    if (ImGui::SliderFloat3("Rotation", (float *)&eulerDegrees, -180.0f, 180.0f))
-                    {
-                        // Set the Euler angles in degrees
-                        entity->transform.rotation.SetEulerAngles(glm::radians(eulerDegrees));
-                        entity->transform.SetDirty();
-                    }
-
-
-                    ImGui::SliderFloat3("Scale", (float *)&entity->transform.localScale, 0.0f, 100.0f);
+                    // Set the Euler angles in degrees
+                    entity->transform.rotation.SetEulerAngles(glm::radians(eulerDegrees));
                     entity->transform.SetDirty();
                 }
+
+                ImGui::SliderFloat3("Scale", (float *)&entity->transform.localScale, 0.0f, 100.0f);
+                entity->transform.SetDirty();
+
                 ImGui::Separator();
                 for (auto &behaviour : entity->GetBehaviours())
                 {
+                    ImGui::PushID((void *)behaviour.get());
+
                     // Get the type name of the behaviour
                     std::string typeName = typeid(*behaviour).name();
                     // cut any numbers from the start of the string
                     typeName = typeName.substr(typeName.find_first_not_of("0123456789"));
 
-                    ImGui::Checkbox(("##" + typeName).c_str(), &behaviour->enabled);
+                    // add empty space for indentation
+                    ImGui::Indent();
+
+                    bool isEnabled = behaviour->enabled.Get();
+                    if (ImGui::Checkbox(("##" + typeName).c_str(), &isEnabled))
+                    {
+                        behaviour->enabled = isEnabled;
+                    }
                     ImGui::SameLine();
                     if (ImGui::CollapsingHeader(typeName.c_str()))
                     {
                         ImGui::Text("Type: %s", typeName.c_str());
                     }
+
+                    ImGui::Unindent();
+                    ImGui::PopID();
                     ImGui::Separator();
                 }
             }
+            ImGui::PopID();
         }
         ImGui::End();
-
-        // Unbind shader
-        glUseProgram(0);
     }
 
     void Game::KeyCallback(int key, int scancode, int action, int mods)

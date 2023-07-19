@@ -6,11 +6,20 @@
 #include "../Public/MeshData.h"
 #include "../Public/Frustum.h"
 
-Model::Model() {}
+Model::Model() : Behaviour()
+{
+    aabb = std::make_unique<Vosgi::AABB>();
+}
 
-Model::Model(const char* path)
+Model::Model(const char* path) : Behaviour()
 {
     LoadModel(path);
+    aabb = std::make_unique<Vosgi::AABB>(Vosgi::generateAABB(meshes));
+}
+
+Model::Model(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+{
+    meshes.push_back(new Mesh(vertices, indices, textures));
     aabb = std::make_unique<Vosgi::AABB>(Vosgi::generateAABB(meshes));
 }
 
@@ -46,7 +55,10 @@ void Model::Clear()
     for (auto& mesh : meshes)
     {
         mesh->Clear();
+        delete mesh;
     }
+    meshes.clear();
+    delete transform;
 }
 
 Vosgi::AABB* Model::GetWorldAABB()

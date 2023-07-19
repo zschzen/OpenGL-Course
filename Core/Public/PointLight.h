@@ -26,6 +26,9 @@ private:
 
     // static point light count
     static unsigned int pointLightCount;
+
+public:
+    static unsigned int GetPointLightCount() { return pointLightCount; }
 };
 
 #endif // !__POINT_LIGHT_H__

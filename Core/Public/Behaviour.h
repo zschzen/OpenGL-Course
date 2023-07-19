@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "Transform.h"
+#include "Observable.h"
 
 // Forward declaration
 class Entity;
@@ -20,23 +21,33 @@ namespace Vosgi
     class Behaviour
     {
     public:
-        Behaviour() {}
+        Behaviour()
+        {
+            enabled.Subscribe([this](bool value) {
+                if (value)
+                    OnEnable();
+                else
+                    OnDisable();
+            });
+        }
         virtual ~Behaviour() {}
 
         virtual void Initialize() {}
         virtual void Start() {}
+        virtual void OnEnable() {}
+        virtual void OnDisable() {}
         virtual void Update(float deltaTime) {}
         virtual void LateUpdate(float deltaTime) {}
         virtual void Draw(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw) {}
         virtual void Terminate() {}
 
-        inline bool IsActive() const { return enabled; }
+        inline bool IsActive() { return enabled; }
 
     //protected:
         Entity* entity = nullptr;
         Vosgi::Transform* transform = nullptr;
 
-        bool enabled = true;
+        Observable<bool> enabled = true;
     };
 }
 #endif // !__BEHAVIOUR_H__
