@@ -102,6 +102,18 @@ private:
     bool bIsConst;
 };
 
+template <typename T, typename... Args>
+MethodPointer<T, Args...> MakeMethodPointer(T* obj, void (T::*method)(Args...))
+{
+    return MethodPointer<T, Args...>(obj, method);
+}
+
+template <typename T, typename... Args>
+MethodPointer<T, Args...> MakeMethodPointer(const T* obj, void (T::*method)(Args...) const)
+{
+    return MethodPointer<T, Args...>(obj, method);
+}
+
 /*
  * This class template can be used to create delegate objects that can store and invoke
  * functions with different signatures. The template takes a variable number of arguments
