@@ -3,6 +3,10 @@
 #include "../Public/Game.h"
 #include "../Public/Editor.h"
 
+#if __APPLE__
+#define GLEW_STATIC
+#endif
+
 namespace Vosgi
 {
     Engine::Engine()

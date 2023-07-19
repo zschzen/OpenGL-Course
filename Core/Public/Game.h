@@ -13,12 +13,12 @@
 #include "../Public/Delegates.h"
 #include "../Public/Camera.h"
 #include "../Public/Model.h"
-#include "../Public/Light.h"
 #include "../Public/Material.h"
 
 // Forward declarations
 class Entity;
 class Shader;
+class PointLight;
 
 namespace Vosgi
 {
@@ -49,6 +49,7 @@ namespace Vosgi
 
         Camera* camera;
         Material shinyMaterial;
+        PointLight* pointLight;
 
         std::vector<std::unique_ptr<Entity>> entities = std::vector<std::unique_ptr<Entity>>();
     };

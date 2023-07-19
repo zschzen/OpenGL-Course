@@ -18,8 +18,6 @@ public:
     Light();
     Light(GLfloat red, GLfloat green, GLfloat blue, GLfloat aIntensity, GLfloat dIntensity);
 
-    void Draw(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw) override;
-
     ~Light();
 
     glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);

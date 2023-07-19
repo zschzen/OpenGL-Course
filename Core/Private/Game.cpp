@@ -4,6 +4,8 @@
 
 #include "../Public/Shader.h"
 #include "../Public/Rotating.h"
+#include "../Public/DirectionalLight.h"
+#include "../Public/PointLight.h"
 
 namespace Vosgi
 {
@@ -17,8 +19,14 @@ namespace Vosgi
 
         // Create objects
         Entity* mainLightEntity = new Entity("Main Light", "Light");
-        mainLightEntity->AddBehaviour<Light>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+        mainLightEntity->AddBehaviour<DirectionalLight>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
         mainLightEntity->transform.SetRotation(glm::quat(glm::radians(glm::vec3(45.0f, 45.0f, 0.0f))));
+
+        // point light
+        Entity* pointLightEntity = new Entity("Point Light", "Light");
+        pointLight = pointLightEntity->AddBehaviour<PointLight>(1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.1f, 0.1f, 0.1f);
+        pointLight->color = glm::vec3(0.0f, 0.0f, 1.0f);
+        pointLightEntity->transform.SetPosition(glm::vec3(0.0f, 0.0f, 2.0f));
 
         Entity* cameraEntity = new Entity("Camera", "Untagged");
         camera = cameraEntity->AddBehaviour<Camera>(glm::vec3(0.0f, 0.0f, 10.0f), 45, window->GetAspectRatio(), 0.1f, 1000.0f);
@@ -27,10 +35,12 @@ namespace Vosgi
 
         flowerEntity->AddBehaviour<Model>("Models/flower/flower.obj");
         flowerEntity->AddBehaviour<Rotating>();
+        flowerEntity->transform.SetPosition(glm::vec3(0.0f, -5.0f, -15.0f));
         flowerEntity->transform.SetLocalScale(glm::vec3(1.0f, 1.0f, 1.0f));
 
         entities.push_back(std::unique_ptr<Entity>(cameraEntity));
         entities.push_back(std::unique_ptr<Entity>(mainLightEntity));
+        entities.push_back(std::unique_ptr<Entity>(pointLightEntity));
         entities.push_back(std::unique_ptr<Entity>(flowerEntity));
     }
 
@@ -69,7 +79,14 @@ namespace Vosgi
         ImGui::SliderFloat("Specular Intensity", &shinyMaterial.specularIntensity, 0.0f, 1.0f);
         ImGui::SliderFloat("Shininess", &shinyMaterial.shininess, 1.0f, 256.0f);
         ImGui::Separator();
-        ImGui::Text("FOV: %f", camera->getFov());
+        // point light
+        ImGui::Text("Point Light");
+        ImGui::ColorEdit3("Color", glm::value_ptr(pointLight->color));
+        ImGui::SliderFloat("Intensity", &pointLight->ambientIntensity, 0.0f, 1.0f);
+        ImGui::SliderFloat("Diffuse", &pointLight->diffuseIntensity, 0.0f, 1.0f);
+        ImGui::SliderFloat("Constant", &pointLight->constant, 0.0f, 1.0f);
+        ImGui::SliderFloat("Linear", &pointLight->linear, 0.0f, 1.0f);
+        ImGui::SliderFloat("Quadratic", &pointLight->quadratic, 0.0f, 1.0f);
         ImGui::End();
 
         // Draw hierarchy
@@ -109,7 +126,7 @@ namespace Vosgi
                     // cut any numbers from the start of the string
                     typeName = typeName.substr(typeName.find_first_not_of("0123456789"));
 
-                    ImGui::Checkbox(("##" + typeName).c_str(), &behaviour->m_isActive);
+                    ImGui::Checkbox(("##" + typeName).c_str(), &behaviour->enabled);
                     ImGui::SameLine();
                     if (ImGui::CollapsingHeader(typeName.c_str()))
                     {

@@ -30,13 +30,13 @@ namespace Vosgi
         virtual void Draw(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw) {}
         virtual void Terminate() {}
 
-        inline bool IsActive() const { return m_isActive; }
+        inline bool IsActive() const { return enabled; }
 
     //protected:
         Entity* entity = nullptr;
         Vosgi::Transform* transform = nullptr;
 
-        bool m_isActive = true;
+        bool enabled = true;
     };
 }
 #endif // !__BEHAVIOUR_H__
