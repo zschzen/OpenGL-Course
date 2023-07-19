@@ -32,6 +32,20 @@ Camera::Camera(glm::vec3 startPos, GLfloat fov, GLfloat aspectRatio, GLfloat nea
 
 void Camera::keyControl(bool *keys, GLfloat deltaTime)
 {
+    // if shift is pressed, move faster, if not, move slower
+    if (keys[GLFW_KEY_LEFT_SHIFT])
+    {
+        movementSpeed = 10.0f;
+    }
+    else if (keys[GLFW_KEY_LEFT_CONTROL])
+    {
+        movementSpeed = 1.0f;
+    }
+    else
+    {
+        movementSpeed = 5.0f;
+    }
+
     const GLfloat velocity = movementSpeed * deltaTime;
 
     if (keys[GLFW_KEY_W])
