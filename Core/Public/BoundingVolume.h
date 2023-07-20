@@ -161,7 +161,7 @@ namespace Vosgi
         }
 
         // see https://gdbooks.gitbooks.io/3dcollisions/content/Chapter2/static_aabb_plane.html
-        bool isOnOrForwardPlane(const Plane &plane) const final
+        [[nodiscard]] bool isOnOrForwardPlane(const Plane &plane) const final
         {
             // Compute the projection interval radius of b onto L(t) = b.c + t * p.n
             const float r = extents.x * std::abs(plane.normal.x) + extents.y * std::abs(plane.normal.y) +
@@ -170,15 +170,15 @@ namespace Vosgi
             return -r <= plane.getSignedDistanceToPlane(center);
         }
 
-        bool isOnFrustum(const Frustum &camFrustum, const Transform &transform) const final
+        [[nodiscard]] bool isOnFrustum(const Frustum &camFrustum, const Transform &transform) const final
         {
             // Get global scale thanks to our transform
             const glm::vec3 globalCenter{transform.GetModel() * glm::vec4(center, 1.f)};
 
             // Scaled orientation
-            const glm::vec3 right = transform.GetRight() * extents.x;
-            const glm::vec3 up = transform.GetUp() * extents.y;
-            const glm::vec3 forward = transform.GetForward() * extents.z;
+            const glm::vec3 right = transform.GetRight() * transform.localScale.x * extents.x;
+            const glm::vec3 up = transform.GetUp() * transform.localScale.y * extents.y;
+            const glm::vec3 forward = transform.GetForward() * transform.localScale.z * extents.z;
 
             const float newIi = std::abs(glm::dot(glm::vec3{1.f, 0.f, 0.f}, right)) +
                                 std::abs(glm::dot(glm::vec3{1.f, 0.f, 0.f}, up)) +
@@ -220,7 +220,7 @@ namespace Vosgi
                 maxAABB.z = std::max(maxAABB.z, vertex.position.z);
             }
         }
-        return AABB(minAABB, maxAABB);
+        return {minAABB, maxAABB };
     }
 
     static Sphere generateSphereBV(const std::vector<Mesh *> &meshes)
@@ -241,7 +241,7 @@ namespace Vosgi
             }
         }
 
-        return Sphere((maxAABB + minAABB) * 0.5f, glm::length(minAABB - maxAABB));
+        return {(maxAABB + minAABB) * 0.5f, glm::length(minAABB - maxAABB) };
     }
 }
 #endif // !__BOUNDING_VOLUME_H__

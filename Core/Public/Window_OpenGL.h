@@ -14,8 +14,8 @@ namespace Vosgi
     {
     public:
         Window_OpenGL(WindowHandle* windowHandle, GLint width, GLint height);
-        Window_OpenGL(WindowHandle* windowHandle);
-        ~Window_OpenGL();
+        explicit Window_OpenGL(WindowHandle* windowHandle);
+        ~Window_OpenGL() override;
 
         int Initialize() override;
         void Run() override;

@@ -15,7 +15,7 @@ namespace Vosgi
         window = new Window_OpenGL(reinterpret_cast<WindowHandle *>(this), (GLfloat)800, (GLfloat)600);
         window->Initialize();
 
-        shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
+        shader = new Shader("Assets/Shaders/shader.vert", "Assets/Shaders/shader.frag");
         shinyMaterial = Material(0.5f, 32.0f);
 
         // Create objects
@@ -58,19 +58,19 @@ namespace Vosgi
 
         // Floor
         Entity *floorEntity = new Entity("Floor", "Untagged");
-        floorEntity->AddBehaviour<Model>("Models/Floor/Floor.obj");
+        floorEntity->AddBehaviour<Model>("Assets/Models/Floor/Floor.obj");
         floorEntity->transform.SetPosition(glm::vec3(0.0f, -25.0f, 0.0f));
         floorEntity->transform.SetLocalScale(glm::vec3(10.0f, 10.0f, 10.0f));
 
         // Flower
         Entity *flowerEntity = new Entity("Flower", "Untagged");
-        flowerEntity->AddBehaviour<Model>("Models/flower/flower.obj");
+        flowerEntity->AddBehaviour<Model>("Assets/Models/flower/flower.obj");
         flowerEntity->AddBehaviour<Rotating>();
         flowerEntity->transform.SetPosition(glm::vec3(0.0f, -4.0f, 0.0f));
 
         // Lantern
         Entity *lanternEntity = new Entity("Lantern", "Untagged");
-        lanternEntity->AddBehaviour<Model>("Models/Lantern/Lantern.obj");
+        lanternEntity->AddBehaviour<Model>("Assets/Models/Lantern/Lantern.obj");
         lanternEntity->transform.SetPosition(glm::vec3(0.0f, -4.0f, 15.0f));
         lanternEntity->transform.SetRotation(glm::quat(glm::radians(glm::vec3(0.0f, -90.0f, 0.0f))));
 

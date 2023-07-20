@@ -1,5 +1,6 @@
 #include "../Public/Model.h"
 
+#include <filesystem>
 #include <stb/stb_image.h>
 
 #include "../Public/Shader.h"

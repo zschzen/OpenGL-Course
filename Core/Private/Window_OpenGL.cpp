@@ -46,7 +46,7 @@ namespace Vosgi
         glfwSwapInterval(1);
 
         // Create the window
-        window = glfwCreateWindow(width, height, "OpenGL", NULL, NULL);
+        window = glfwCreateWindow(width, height, "Vosgi Engine", NULL, NULL);
         if (!window)
         {
             printf("ERROR::GLFW_WINDOW_CREATION_FAILED\n");
