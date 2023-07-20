@@ -27,7 +27,7 @@ namespace Vosgi
         Entity *pointLightEntity = new Entity("Point Light", "Light");
         pointLight = pointLightEntity->AddBehaviour<PointLight>(1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.1f, 0.1f, 0.1f);
         pointLight->color = glm::vec3(0.0f, 0.0f, 1.0f);
-        pointLightEntity->transform.SetPosition(glm::vec3(0.0f, 0.0f, 10.0f));
+        pointLightEntity->transform.SetPosition(glm::vec3(-10.0f, 0.0f, 0.0f));
 
         // second point light
         Entity *pointLightEntity2 = new Entity("Point Light 2", "Light");
@@ -43,16 +43,15 @@ namespace Vosgi
 
         // point light parent
         Entity *pointLightParent = new Entity("Point Light Parent", "Light");
-        pointLightParent->transform.SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
         pointLightParent->AddChild(std::unique_ptr<Entity>(pointLightEntity));
         pointLightParent->AddChild(std::unique_ptr<Entity>(pointLightEntity2));
         pointLightParent->AddChild(std::unique_ptr<Entity>(pointLightEntity3));
 
         // spot light
         Entity *spotLightEntity = new Entity("Spot Light", "Light");
-        spotLight = spotLightEntity->AddBehaviour<SpotLight>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.1f, 0.1f, 0.1f, 12.5f);
-        spotLightEntity->transform.SetPosition(glm::vec3(0.0f, 8.0f, -15.0f));
-        spotLightEntity->transform.SetRotation(glm::quat(glm::radians(glm::vec3(-90.0f, 0.0f, 0.0f))));
+        spotLight = spotLightEntity->AddBehaviour<SpotLight>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.1f, 0.1f, 0.1f, 35.0f);
+        spotLightEntity->transform.SetPosition(glm::vec3(0.0f, 0.0f, 15.0f));
+        //spotLightEntity->transform.SetRotation(glm::quat(glm::radians(glm::vec3(0.0f, 80.0f, 0.0f))));
 
         Entity *cameraEntity = new Entity("Main Camera", "MainCamera");
         camera = cameraEntity->AddBehaviour<Camera>(glm::vec3(0.0f, 0.0f, 10.0f), 45, window->GetAspectRatio(), 0.1f, 1000.0f);
@@ -67,14 +66,20 @@ namespace Vosgi
         Entity *flowerEntity = new Entity("Flower", "Untagged");
         flowerEntity->AddBehaviour<Model>("Models/flower/flower.obj");
         flowerEntity->AddBehaviour<Rotating>();
-        flowerEntity->transform.SetPosition(glm::vec3(0.0f, -5.0f, -15.0f));
-        flowerEntity->transform.SetLocalScale(glm::vec3(1.0f, 1.0f, 1.0f));
+        flowerEntity->transform.SetPosition(glm::vec3(0.0f, -4.0f, 0.0f));
+
+        // Lantern
+        Entity *lanternEntity = new Entity("Lantern", "Untagged");
+        lanternEntity->AddBehaviour<Model>("Models/Lantern/Lantern.obj");
+        lanternEntity->transform.SetPosition(glm::vec3(0.0f, -4.0f, 15.0f));
+        lanternEntity->transform.SetRotation(glm::quat(glm::radians(glm::vec3(0.0f, -90.0f, 0.0f))));
 
         entities.push_back(std::unique_ptr<Entity>(cameraEntity));
         entities.push_back(std::unique_ptr<Entity>(mainLightEntity));
         entities.push_back(std::unique_ptr<Entity>(pointLightParent));
         entities.push_back(std::unique_ptr<Entity>(spotLightEntity));
         entities.push_back(std::unique_ptr<Entity>(flowerEntity));
+        entities.push_back(std::unique_ptr<Entity>(lanternEntity));
         entities.push_back(std::unique_ptr<Entity>(floorEntity));
     }
 
