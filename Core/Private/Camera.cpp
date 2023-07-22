@@ -118,7 +118,13 @@ void Camera::DrawInspector()
 {
     ImGui::SliderFloat("Movement Speed", &movementSpeed, 0.f, 10.f);
     ImGui::SliderFloat("Turn Speed", &turnSpeed, 0.f, 1.f);
-    ImGui::SliderFloat("FOV", &fov, 0.f, 180.f);
+
+    GLfloat currentFOV = fov;
+    if (ImGui::SliderFloat("FOV", &currentFOV, 0.f, 180.f))
+    {
+        setFov(currentFOV);
+    }
+
     ImGui::SliderFloat("Near Plane", &nearPlane, 0.f, 10.f);
     ImGui::SliderFloat("Far Plane", &farPlane, 0.f, 100.f);
 }
