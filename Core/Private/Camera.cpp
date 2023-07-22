@@ -3,7 +3,7 @@
 #include "../Public/Frustum.h"
 #include "../Public/Shader.h"
 
-Camera::Camera()
+Camera::Camera() : Vosgi::Behaviour()
 {
     worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -14,7 +14,7 @@ Camera::Camera()
     projection = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 }
 
-Camera::Camera(glm::vec3 startPos, GLfloat fov, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane)
+Camera::Camera(glm::vec3 startPos, GLfloat fov, GLfloat aspectRatio, GLfloat nearPlane, GLfloat farPlane) : Vosgi::Behaviour()
 {
     worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -50,13 +50,13 @@ void Camera::keyControl(bool *keys, GLfloat deltaTime)
 
     if (keys[GLFW_KEY_W])
     {
-        transform->position += transform->GetForward() * velocity;
+        transform->position -= transform->GetForward() * velocity;
         transform->SetDirty();
     }
 
     if (keys[GLFW_KEY_S])
     {
-        transform->position -= transform->GetForward() * velocity;
+        transform->position += transform->GetForward() * velocity;
         transform->SetDirty();
     }
 
@@ -102,16 +102,25 @@ void Camera::mouseControl(GLfloat xChange, GLfloat yChange)
     transform->SetRotation(rotation);
 }
 
-void Camera::Draw(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw)
+void Camera::Update(float deltaTime)
 {
     // Set the projection matrix
-    shader.SetMat4("projection", projection);
+    Shader::SetGlobalMat4("projection", projection);
 
     // Set the view matrix
-    shader.SetMat4("view", calculateViewMatrix());
+    Shader::SetGlobalMat4("view", calculateViewMatrix());
 
     // Set the camera position
-    shader.SetVec3("eyePos", getCameraPosition());
+    Shader::SetGlobalVec3("eyePos", getCameraPosition());
+}
+
+void Camera::DrawInspector()
+{
+    ImGui::SliderFloat("Movement Speed", &movementSpeed, 0.f, 10.f);
+    ImGui::SliderFloat("Turn Speed", &turnSpeed, 0.f, 1.f);
+    ImGui::SliderFloat("FOV", &fov, 0.f, 180.f);
+    ImGui::SliderFloat("Near Plane", &nearPlane, 0.f, 10.f);
+    ImGui::SliderFloat("Far Plane", &farPlane, 0.f, 100.f);
 }
 
 // TODO: Cache frustum planes
@@ -120,10 +129,10 @@ Frustum Camera::getFrustum() const
     Frustum frustum;
     const float halfVSide = farPlane * tanf(glm::radians(fov) * .5f);
     const float halfHSide = halfVSide * aspectRatio;
-    const glm::vec3 frontMultFar = farPlane * getFront();
+    const glm::vec3 frontMultFar = farPlane * -getFront();
 
-    frustum.nearFace = {getCameraPosition() + nearPlane * getFront(), getFront()};
-    frustum.farFace = {getCameraPosition() + frontMultFar, -getFront()};
+    frustum.nearFace = {getCameraPosition() + nearPlane * -getFront(), -getFront()};
+    frustum.farFace = {getCameraPosition() + frontMultFar, getFront()};
     frustum.rightFace = {getCameraPosition(), glm::cross(frontMultFar - getRight() * halfHSide, getUp())};
     frustum.leftFace = {getCameraPosition(), glm::cross(getUp(), frontMultFar + getRight() * halfHSide)};
     frustum.topFace = {getCameraPosition(), glm::cross(getRight(), frontMultFar - getUp() * halfVSide)};

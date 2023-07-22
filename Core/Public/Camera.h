@@ -17,7 +17,9 @@ public:
 
     void keyControl(bool *key, float deltaTime);
     void mouseControl(GLfloat xChange, GLfloat yChange);
-    void Draw(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw) override;
+
+    void Update(float deltaTime) override;
+    void DrawInspector() override;
 
     inline glm::vec3 getCameraPosition() const { return transform->position; }
     inline glm::vec3 getCameraDirection() const { return transform->GetForward(); }
@@ -32,7 +34,7 @@ public:
     inline glm::mat4 calculateViewMatrix() const
     {
         glm::vec3 pos = transform->position;
-        return glm::lookAt(pos, pos + transform->GetForward(), transform->GetUp());
+        return glm::lookAt(pos, pos - transform->GetForward(), transform->GetUp());
     }
 
     // Get frustum planes

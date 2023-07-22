@@ -50,6 +50,17 @@ private:
 private:
     std::string GetAbsolutePath(const char* fileLocation);
 
+public:
+    // Globally set uniforms
+    static void SetGlobalBool(const char* name, bool value);
+    static void SetGlobalInt(const char* name, int value);
+    static void SetGlobalFloat(const char* name, float value);
+    static void SetGlobalVec3(const char* name, glm::vec3 value);
+    static void SetGlobalVec3(const char* name, float x, float y, float z);
+    static void SetGlobalVec4(const char* name, glm::vec4 value);
+    static void SetGlobalVec4(const char* name, float x, float y, float z, float w);
+    static void SetGlobalMat4(const char* name, glm::mat4 value);
+
 private:
     // static list of all shaders
     static std::vector<Shader*> shaders;

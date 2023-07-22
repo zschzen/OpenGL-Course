@@ -9,6 +9,14 @@ Shader::Shader()
     shaderID = 0;
 }
 
+Shader::~Shader()
+{
+    // Remove from static map of shaders
+    shaders.erase(std::remove(shaders.begin(), shaders.end(), this), shaders.end());
+
+    Clear();
+}
+
 Shader::Shader(const char* vertexLocation, const char* fragmentLocation)
 {
     CreateFromFiles(vertexLocation, fragmentLocation);
@@ -185,10 +193,66 @@ std::string Shader::GetAbsolutePath(const char* fileLocation)
     return path.generic_string();
 }
 
-Shader::~Shader()
+void Shader::SetGlobalBool(const char* name, bool value)
 {
-    // Remove from static map of shaders
-    shaders.erase(std::remove(shaders.begin(), shaders.end(), this), shaders.end());
+    for (auto& shader : shaders)
+    {
+        shader->SetBool(name, value);
+    }
+}
 
-	Clear();
+void Shader::SetGlobalInt(const char* name, int value)
+{
+    for (auto& shader : shaders)
+    {
+        shader->SetInt(name, value);
+    }
+}
+
+void Shader::SetGlobalFloat(const char* name, float value)
+{
+    for (auto& shader : shaders)
+    {
+        shader->SetFloat(name, value);
+    }
+}
+
+void Shader::SetGlobalVec3(const char* name, glm::vec3 value)
+{
+    for (auto& shader : shaders)
+    {
+        shader->SetVec3(name, value);
+    }
+}
+
+void Shader::SetGlobalVec3(const char* name, float x, float y, float z)
+{
+    for (auto& shader : shaders)
+    {
+        shader->SetVec3(name, x, y, z);
+    }
+}
+
+void Shader::SetGlobalVec4(const char* name, glm::vec4 value)
+{
+    for (auto& shader : shaders)
+    {
+        shader->SetVec4(name, value);
+    }
+}
+
+void Shader::SetGlobalVec4(const char* name, float x, float y, float z, float w)
+{
+    for (auto& shader : shaders)
+    {
+        shader->SetVec4(name, x, y, z, w);
+    }
+}
+
+void Shader::SetGlobalMat4(const char* name, glm::mat4 value)
+{
+    for (auto& shader : shaders)
+    {
+        shader->SetMat4(name, value);
+    }
 }

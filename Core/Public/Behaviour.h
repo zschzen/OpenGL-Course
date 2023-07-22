@@ -7,6 +7,7 @@
 
 #include "Transform.h"
 #include "Observable.h"
+#include "imgui/imgui.h"
 
 // Forward declaration
 class Entity;
@@ -30,7 +31,7 @@ namespace Vosgi
                     OnDisable();
             });
         }
-        virtual ~Behaviour() {}
+        virtual ~Behaviour() = default;
 
         virtual void Initialize() {}
         virtual void Start() {}
@@ -40,6 +41,8 @@ namespace Vosgi
         virtual void LateUpdate(float deltaTime) {}
         virtual void Draw(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw) {}
         virtual void Terminate() {}
+
+        virtual void DrawInspector() {}
 
         inline bool IsActive() { return enabled; }
 

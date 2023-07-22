@@ -1,6 +1,5 @@
 #include "../Public/Entity.h"
 
-#include "../Public/BoundingVolume.h"
 #include "../Public/GUID.h"
 
 namespace Vosgi
@@ -104,15 +103,13 @@ namespace Vosgi
 
     void Entity::DrawSelfAndChildren(float deltaTime, const Frustum &frustum, Shader &shader, unsigned int &display, unsigned int &draw, unsigned int &total)
     {
-        if (!enabled)
-            return;
+        if (!enabled) return;
 
         UpdateSelfAndChildren();
 
         for (auto &component : behaviours)
         {
-            if (!component->IsActive())
-                continue;
+            if (!component->IsActive()) continue;
 
             component->Update(deltaTime);
             // ...

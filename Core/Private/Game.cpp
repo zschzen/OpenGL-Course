@@ -112,35 +112,6 @@ namespace Vosgi
         // Unbind shader
         glUseProgram(0);
 
-        // Draw rendering controls
-        ImGui::Begin("Light");
-        ImGui::ColorEdit3("Light Color", glm::value_ptr(directionalLight->color));
-        ImGui::SliderFloat("Ambient Intensity", &directionalLight->ambientIntensity, 0.0f, 1.0f);
-        ImGui::SliderFloat("Diffuse Intensity", &directionalLight->diffuseIntensity, 0.0f, 1.0f);
-        ImGui::SliderFloat("Specular Intensity", &shinyMaterial.specularIntensity, 0.0f, 1.0f);
-        ImGui::SliderFloat("Shininess", &shinyMaterial.shininess, 1.0f, 256.0f);
-        ImGui::Separator();
-        // point light
-        ImGui::Text("Point Light");
-        ImGui::ColorEdit3("Color", glm::value_ptr(pointLight->color));
-        ImGui::SliderFloat("Intensity", &pointLight->ambientIntensity, 0.0f, 1.0f);
-        ImGui::SliderFloat("Diffuse", &pointLight->diffuseIntensity, 0.0f, 1.0f);
-        ImGui::SliderFloat("Constant", &pointLight->constant, 0.0f, 1.0f);
-        ImGui::SliderFloat("Linear", &pointLight->linear, 0.0f, 1.0f);
-        ImGui::SliderFloat("Quadratic", &pointLight->quadratic, 0.0f, 1.0f);
-        ImGui::Separator();
-        // spot light
-        ImGui::Text("Spot Light");
-        ImGui::ColorEdit3("1Color", glm::value_ptr(spotLight->color));
-        ImGui::SliderFloat("1Intensity", &spotLight->ambientIntensity, 0.0f, 1.0f);
-        ImGui::SliderFloat("1Diffuse", &spotLight->diffuseIntensity, 0.0f, 1.0f);
-        ImGui::SliderFloat("1Constant", &spotLight->constant, 0.0f, 1.0f);
-        ImGui::SliderFloat("1Linear", &spotLight->linear, 0.0f, 1.0f);
-        ImGui::SliderFloat("1Quadratic", &spotLight->quadratic, 0.0f, 1.0f);
-        ImGui::SliderFloat("1Edge", &spotLight->edge, 0.0f, 90.0f);
-        ImGui::Separator();
-        ImGui::End();
-
         // Draw hierarchy
         ImGui::Begin("Hierarchy");
         for (auto &entity : entities)
@@ -157,7 +128,6 @@ namespace Vosgi
                 // ImGui::SameLine();
                 ImGui::Text("Tag: %s", entity->tag.c_str());
                 ImGui::Text("GUID: %s", entity->GetGUID().c_str());
-                ImGui::Text("Forward: (%f, %f, %f)", entity->transform.GetForward().x, entity->transform.GetForward().y, entity->transform.GetForward().z);
                 ImGui::Separator();
 
                 // Transform
@@ -189,7 +159,7 @@ namespace Vosgi
                     // add empty space for indentation
                     ImGui::Indent();
 
-                    bool isEnabled = behaviour->enabled.Get();
+                    bool isEnabled = behaviour->enabled;
                     if (ImGui::Checkbox(("##" + typeName).c_str(), &isEnabled))
                     {
                         behaviour->enabled = isEnabled;
@@ -197,7 +167,7 @@ namespace Vosgi
                     ImGui::SameLine();
                     if (ImGui::CollapsingHeader(typeName.c_str()))
                     {
-                        ImGui::Text("Type: %s", typeName.c_str());
+                        behaviour->DrawInspector();
                     }
 
                     ImGui::Unindent();

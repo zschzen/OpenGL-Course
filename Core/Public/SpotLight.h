@@ -11,7 +11,9 @@ public:
     SpotLight();
     SpotLight(float red, float green, float blue, float aIntensity, float dIntensity, float con, float lin, float exp, float edg);
 
+    void OnDisable() override;
     void Draw(const Frustum &frustum, Shader &shader, unsigned int &display, unsigned int &draw) override;
+    void DrawInspector() override;
 
     ~SpotLight();
 

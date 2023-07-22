@@ -30,14 +30,14 @@ class Model : public Vosgi::Behaviour
 {
 public:
     Model();
-    Model(const char* path);
+    explicit Model(const char* path);
     Model(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
-    ~Model();
+    ~Model() override;
 
     void Render(Shader& shader, unsigned int& draw);
     void Clear();
 
-    void Draw(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw);
+    void Draw(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw) override;
 
     const std::vector<Mesh*>& GetMeshes() const { return meshes; }
 

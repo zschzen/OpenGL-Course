@@ -30,6 +30,20 @@ SpotLight::SpotLight(float red, float green, float blue, float aIntensity, float
     id = spotLightCount++;
 }
 
+void SpotLight::OnDisable()
+{
+    char buffer[100] = {'\0'};
+    snprintf(buffer, sizeof(buffer), "spotLights[%d].", id);
+    std::string str(buffer);
+
+    auto shaders = Shader::GetShaders();
+    for (auto& shader : shaders)
+    {
+        shader->SetFloat((str + "base.base.ambientIntensity").c_str(), 0.0f);
+        shader->SetFloat((str + "base.base.diffuseIntensity").c_str(), 0.0f);
+    }
+}
+
 void SpotLight::Draw(const Frustum &frustum, Shader &shader, unsigned int &display, unsigned int &draw)
 {
     char buffer[100] = {'\0'};
@@ -50,6 +64,17 @@ void SpotLight::Draw(const Frustum &frustum, Shader &shader, unsigned int &displ
 
     shader.SetVec3((str + "direction").c_str(), transform->GetForward());
     shader.SetFloat((str + "edge").c_str(), cosf(glm::radians(edge)));
+}
+
+void SpotLight::DrawInspector()
+{
+    ImGui::ColorEdit3("Color", glm::value_ptr(color));
+    ImGui::SliderFloat("Ambient Intensity", &ambientIntensity, 0.0f, 1.0f);
+    ImGui::SliderFloat("Diffuse Intensity", &diffuseIntensity, 0.0f, 1.0f);
+    ImGui::SliderFloat("Constant", &constant, 0.0f, 1.0f);
+    ImGui::SliderFloat("Linear", &linear, 0.0f, 1.0f);
+    ImGui::SliderFloat("Quadratic", &quadratic, 0.0f, 1.0f);
+    ImGui::SliderFloat("Edge", &edge, 0.0f, 90.0f);
 }
 
 SpotLight::~SpotLight()

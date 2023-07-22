@@ -43,6 +43,17 @@ void PointLight::Draw(const Frustum &frustum, Shader &shader, unsigned int &disp
     shader.SetFloat((str + "quadratic").c_str(), quadratic);
 }
 
+void PointLight::DrawInspector()
+{
+    ImGui::ColorEdit3("Color", &color[0]);
+    ImGui::SliderFloat("Ambient Intensity", &ambientIntensity, 0.0f, 1.0f);
+    ImGui::SliderFloat("Diffuse Intensity", &diffuseIntensity, 0.0f, 1.0f);
+
+    ImGui::SliderFloat("Constant", &constant, 0.0f, 1.0f);
+    ImGui::SliderFloat("Linear", &linear, 0.0f, 1.0f);
+    ImGui::SliderFloat("Quadratic", &quadratic, 0.0f, 1.0f);
+}
+
 PointLight::~PointLight()
 {
     pointLightCount--;

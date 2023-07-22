@@ -22,6 +22,13 @@ void DirectionalLight::Draw(const Frustum& frustum, Shader& shader, unsigned int
     shader.SetVec3("directionalLight.direction", transform->GetForward());
 }
 
+void DirectionalLight::DrawInspector()
+{
+    ImGui::ColorEdit3("Colour", &color[0]);
+    ImGui::SliderFloat("Ambient Intensity", &ambientIntensity, 0.0f, 1.0f);
+    ImGui::SliderFloat("Diffuse Intensity", &diffuseIntensity, 0.0f, 1.0f);
+}
+
 DirectionalLight::~DirectionalLight()
 {
 }

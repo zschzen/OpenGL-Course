@@ -12,6 +12,7 @@ public:
     DirectionalLight(GLfloat red, GLfloat green, GLfloat blue, GLfloat aIntensity, GLfloat dIntensity);
 
     void Draw(const Frustum &frustum, Shader &shader, unsigned int &display, unsigned int &draw) override;
+    void DrawInspector() override;
 
     ~DirectionalLight();
 };

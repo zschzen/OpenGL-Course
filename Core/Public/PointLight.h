@@ -13,8 +13,9 @@ public:
                GLfloat con, GLfloat lin, GLfloat exp);
 
     void Draw(const Frustum &frustum, Shader &shader, unsigned int &display, unsigned int &draw) override;
+    void DrawInspector() override;
 
-    ~PointLight();
+    ~PointLight() override;
 
 public:
     GLfloat constant;
