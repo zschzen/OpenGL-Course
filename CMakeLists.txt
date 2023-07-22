@@ -14,6 +14,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Core/Public)
 
 # Collect all source files from Core/Private
 file(GLOB PRIVATE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Core/Private/*.cpp")
+file(GLOB PUBLIC_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/Core/Public/*.h")
 file(GLOB IMGUI_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/include/imgui/*.cpp")
 
 # Add Assets folder
@@ -58,6 +59,7 @@ include_directories(${GLEW_INCLUDE_DIRS} ${GLFW3_INCLUDE_DIRS} ${GLM_INCLUDE_DIR
 # List your source files
 set(SOURCES
         main.cpp
+        ${PUBLIC_HEADERS}
         ${PRIVATE_SOURCES}
         ${IMGUI_SOURCES}
         )
@@ -102,6 +104,7 @@ if (APPLE)
             "-framework Cocoa"
             "-framework IOKit"
             "-framework CoreVideo"
+            "-framework CoreFoundation"
             )
 endif (APPLE)
 
