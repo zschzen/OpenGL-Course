@@ -10,7 +10,6 @@
 #include <assimp/postprocess.h>
 
 #include "MeshData.h"
-#include "Texture.h"
 
 // Forward declaration
 class Shader;
@@ -18,9 +17,10 @@ class Shader;
 class Mesh
 {
 public:
-    Mesh();
+    Mesh() = default;
     Mesh(SubMesh subMesh);
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+    ~Mesh();
 
     void Update(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 
@@ -32,8 +32,6 @@ public:
     const std::vector<Vertex>& GetVertices() const { return meshFilter.vertices; }
     const std::vector<unsigned int>& GetIndices() const { return meshFilter.indices; }
     const std::vector<Texture>& GetTextures() const { return meshFilter.textures; }
-
-    ~Mesh();
 
 protected:
     SubMesh meshFilter = SubMesh();

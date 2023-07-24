@@ -5,26 +5,18 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 
-#include <string.h>
-#include <vector>
-
-#include "Mesh.h"
-
-// Forward declarations
-class Shader;
-struct Vertex;
-
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 #include "Mesh.h"
-#include "Texture.h"
+#include "Material.h"
 #include "Behaviour.h"
 #include "BoundingVolume.h"
 
 // Forward declaration
 class Shader;
+struct Vertex;
 
 class Model : public Vosgi::Behaviour
 {
@@ -48,6 +40,8 @@ private:
     std::vector<Texture> texturesLoaded = std::vector<Texture>();
     std::string directory = std::string();   
     std::unique_ptr<Vosgi::AABB> aabb;
+
+    Material material = Material();
 
     void LoadModel(const std::string& fileName);
     void ProcessNode(aiNode* node, const aiScene* scene);

@@ -42,6 +42,7 @@ struct SpotLight
 
 struct Material
 {
+	vec3 baseColour;
 	float specularIntensity;
 	float shininess;
 };
@@ -146,7 +147,7 @@ vec4 CalcSpotLights()
 void main()
 {
     // texture
-    colour = texture(mainTexture, TexCoord);
+    colour = material.baseColour * texture(mainTexture, TexCoord);
 
 	// Discard pixels that are mostly transparent
     if (colour.a < 0.1) discard;

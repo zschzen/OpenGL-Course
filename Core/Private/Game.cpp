@@ -2,7 +2,6 @@
 
 #include <imgui/imgui.h>
 
-#include "../Public/Shader.h"
 #include "../Public/Rotating.h"
 #include "../Public/DirectionalLight.h"
 #include "../Public/PointLight.h"
@@ -12,11 +11,10 @@ namespace Vosgi
 {
     Game::Game()
     {
-        window = new Window_OpenGL(reinterpret_cast<WindowHandle *>(this), (GLfloat)800, (GLfloat)600);
+        window = new Window_OpenGL(reinterpret_cast<WindowHandle *>(this), (GLfloat)1000, (GLfloat)750);
         window->Initialize();
 
         shader = new Shader("Assets/Shaders/shader.vert", "Assets/Shaders/shader.frag");
-        shinyMaterial = Material(0.5f, 32.0f);
 
         // Create objects
         Entity *mainLightEntity = new Entity("Main Light", "Light");
@@ -98,8 +96,6 @@ namespace Vosgi
         camera->keyControl(keys, deltaTime);
 
         shader->Use();
-
-        shinyMaterial.Use(*shader);
 
         Frustum frustum = camera->getFrustum();
 

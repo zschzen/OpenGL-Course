@@ -31,11 +31,16 @@ void Model::Draw(const Frustum& frustum, Shader& shader, unsigned int& display, 
 {
     if (!aabb->isOnFrustum(frustum, *transform)) return;
 
+    // Set polygon mode
     if (m_isWireframe)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
+    // Use material
+    material.Use(shader);
+
+    // Draw model
     shader.SetMat4("model", transform->GetModel());
     for (auto& mesh : meshes)
     {
@@ -44,6 +49,7 @@ void Model::Draw(const Frustum& frustum, Shader& shader, unsigned int& display, 
     }
     ++display;
 
+    // Reset polygon mode
     if (m_isWireframe)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -63,6 +69,15 @@ void Model::Clear()
 
 void Model::DrawInspector()
 {
+    // Material
+    ImGui::Indent();
+    if (ImGui::CollapsingHeader("Material"))
+    {
+        ImGui::ColorEdit3("Base Color", &material.baseColor[0]);
+        ImGui::SliderFloat("Ambient", &material.specularIntensity, 0.0f, 1.0f);
+        ImGui::SliderFloat("Shininess", &material.shininess, 0.0f, 256.0f);
+    }
+    ImGui::Separator();
     ImGui::Checkbox("Wireframe", &m_isWireframe);
 }
 

@@ -50,7 +50,6 @@ namespace Vosgi
         bool mouseFirstMoved = true;
 
         Camera* camera;
-        Material shinyMaterial;
 
         std::vector<std::unique_ptr<Entity>> entities = std::vector<std::unique_ptr<Entity>>();
     };

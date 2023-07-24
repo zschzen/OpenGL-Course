@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include <utility>
 
 #include "Texture.h"
 
@@ -28,15 +29,15 @@ struct SubMesh
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
 
-    GLuint VAO, VBO, IBO;
+    GLuint VAO{}, VBO{}, IBO{};
 
     // Constructor
-    SubMesh() {}
+    SubMesh() = default;
 
     SubMesh(std::vector<Vertex> verts, std::vector<unsigned int> inds, std::vector<Texture> texs)
     {
-        vertices = verts;
-        indices = inds;
-        textures = texs;
+        vertices = std::move(verts);
+        indices = std::move(inds);
+        textures = std::move(texs);
     }
 };

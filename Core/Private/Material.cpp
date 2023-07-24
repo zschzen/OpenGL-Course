@@ -14,6 +14,7 @@ Material::Material(GLfloat sIntensity, GLfloat shine)
 
 void Material::Use(Shader& shader)
 {
+    shader.SetVec3("material.baseColour", baseColor);
     shader.SetFloat("material.specularIntensity", specularIntensity);
     shader.SetFloat("material.shininess", shininess);
 }

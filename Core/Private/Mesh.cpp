@@ -1,18 +1,17 @@
+#include <utility>
+
 #include "../Public/Mesh.h"
 
-#include "../Public/MeshData.h"
 #include "../Public/Shader.h"
-
-Mesh::Mesh() {}
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
 {
-    Update(vertices, indices, textures);
+    Update(std::move(vertices), std::move(indices), std::move(textures));
 }
 
 void Mesh::Update(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
 {
-    SubMesh subMesh = SubMesh(vertices, indices, textures);
+    SubMesh subMesh = SubMesh(vertices, indices, std::move(textures));
 
     glGenVertexArrays(1, &subMesh.VAO);
     glBindVertexArray(subMesh.VAO);

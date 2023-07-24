@@ -4,6 +4,7 @@
 #pragma once
 
 #include <GL/glew.h>
+#include <GLM/glm.hpp>
 
 // Forward declaration
 class Shader;
@@ -19,8 +20,9 @@ public:
     ~Material();
 
 public:
-    GLfloat specularIntensity = 0.0f;
-    GLfloat shininess = 0.0f;
+    glm::vec3 baseColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    GLfloat specularIntensity = 0.5f;
+    GLfloat shininess = 32.0f;
 
 };
 
