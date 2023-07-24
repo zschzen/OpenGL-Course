@@ -20,12 +20,12 @@ namespace Vosgi
 
         // Create objects
         Entity *mainLightEntity = new Entity("Main Light", "Light");
-        directionalLight = mainLightEntity->AddBehaviour<DirectionalLight>(.5f, .5f, .5f, 1.0f, 1.0f);
+        mainLightEntity->AddBehaviour<DirectionalLight>(.5f, .5f, .5f, 1.0f, 1.0f);
         mainLightEntity->transform.SetRotation(glm::quat(glm::radians(glm::vec3(45.0f, 45.0f, 0.0f))));
 
         // point light
         Entity *pointLightEntity = new Entity("Point Light", "Light");
-        pointLight = pointLightEntity->AddBehaviour<PointLight>(1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.1f, 0.1f, 0.1f);
+        PointLight *pointLight = pointLightEntity->AddBehaviour<PointLight>(1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.1f, 0.1f, 0.1f);
         pointLight->color = glm::vec3(0.0f, 0.0f, 1.0f);
         pointLightEntity->transform.SetPosition(glm::vec3(-10.0f, 0.0f, 0.0f));
 
@@ -46,12 +46,13 @@ namespace Vosgi
         pointLightParent->AddChild(std::unique_ptr<Entity>(pointLightEntity));
         pointLightParent->AddChild(std::unique_ptr<Entity>(pointLightEntity2));
         pointLightParent->AddChild(std::unique_ptr<Entity>(pointLightEntity3));
+        pointLightParent->AddBehaviour<Rotating>();
 
         // spot light
         Entity *spotLightEntity = new Entity("Spot Light", "Light");
-        spotLight = spotLightEntity->AddBehaviour<SpotLight>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.1f, 0.1f, 0.1f, 35.0f);
+        spotLightEntity->AddBehaviour<SpotLight>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.1f, 0.1f, 0.1f, 35.0f);
         spotLightEntity->transform.SetPosition(glm::vec3(0.0f, 0.0f, 15.0f));
-        //spotLightEntity->transform.SetRotation(glm::quat(glm::radians(glm::vec3(0.0f, 80.0f, 0.0f))));
+        spotLightEntity->transform.SetRotation(glm::quat(glm::radians(glm::vec3(0.0f, 180.0f, 0.0f))));
 
         Entity *cameraEntity = new Entity("Main Camera", "MainCamera");
         camera = cameraEntity->AddBehaviour<Camera>(glm::vec3(0.0f, 0.0f, 10.0f), 45, window->GetAspectRatio(), 0.1f, 1000.0f);
@@ -59,14 +60,12 @@ namespace Vosgi
         // Floor
         Entity *floorEntity = new Entity("Floor", "Untagged");
         floorEntity->AddBehaviour<Model>("Assets/Models/Floor/Floor.obj");
-        floorEntity->transform.SetPosition(glm::vec3(0.0f, -25.0f, 0.0f));
+        floorEntity->transform.SetPosition(glm::vec3(0.0f, -23.0f, 0.0f));
         floorEntity->transform.SetLocalScale(glm::vec3(10.0f, 10.0f, 10.0f));
 
         // Flower
-        Entity *flowerEntity = new Entity("Flower", "Untagged");
-        flowerEntity->AddBehaviour<Model>("Assets/Models/flower/flower.obj");
-        flowerEntity->AddBehaviour<Rotating>();
-        flowerEntity->transform.SetPosition(glm::vec3(0.0f, -4.0f, 0.0f));
+        Entity *flowerEntity = new Entity("Calvin And Hobbes by npbehunin", "Untagged");
+        flowerEntity->AddBehaviour<Model>("Assets/Models/calvinhobbes/scene.gltf");
 
         // Lantern
         Entity *lanternEntity = new Entity("Lantern", "Untagged");
@@ -107,77 +106,14 @@ namespace Vosgi
         for (auto &entity : entities)
         {
             entity->DrawSelfAndChildren(deltaTime, frustum, *shader, displayCount, drawCount, entityCount);
+
+            ImGui::Begin("Hierarchy");
+            entity->DrawInspector();
+            ImGui::End();
         }
 
         // Unbind shader
         glUseProgram(0);
-
-        // Draw hierarchy
-        ImGui::Begin("Hierarchy");
-        for (auto &entity : entities)
-        {
-            ImGui::PushID((void *)entity.get());
-            bool isEnabled = entity->enabled;
-            if (ImGui::Checkbox(("##" + entity->name).c_str(), &isEnabled))
-            {
-                entity->enabled = isEnabled;
-            }
-            ImGui::SameLine();
-            if (ImGui::CollapsingHeader(entity->name.c_str()))
-            {
-                // ImGui::SameLine();
-                ImGui::Text("Tag: %s", entity->tag.c_str());
-                ImGui::Text("GUID: %s", entity->GetGUID().c_str());
-                ImGui::Separator();
-
-                // Transform
-                ImGui::SliderFloat3("Position", (float *)&entity->transform.position, -100.0f, 100.0f);
-
-                // Retrieve the Euler angles in degrees
-                glm::vec3 eulerDegrees = entity->transform.rotation.GetEulerAnglesDegrees();
-                // Create a Float3 widget to edit the Euler angles
-                if (ImGui::SliderFloat3("Rotation", (float *)&eulerDegrees, -180.0f, 180.0f))
-                {
-                    // Set the Euler angles in degrees
-                    entity->transform.rotation.SetEulerAngles(glm::radians(eulerDegrees));
-                    entity->transform.SetDirty();
-                }
-
-                ImGui::SliderFloat3("Scale", (float *)&entity->transform.localScale, 0.0f, 100.0f);
-                entity->transform.SetDirty();
-
-                ImGui::Separator();
-                for (auto &behaviour : entity->GetBehaviours())
-                {
-                    ImGui::PushID((void *)behaviour.get());
-
-                    // Get the type name of the behaviour
-                    std::string typeName = typeid(*behaviour).name();
-                    // cut any numbers from the start of the string
-                    typeName = typeName.substr(typeName.find_first_not_of("0123456789"));
-
-                    // add empty space for indentation
-                    ImGui::Indent();
-
-                    bool isEnabled = behaviour->enabled;
-                    if (ImGui::Checkbox(("##" + typeName).c_str(), &isEnabled))
-                    {
-                        behaviour->enabled = isEnabled;
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::CollapsingHeader(typeName.c_str()))
-                    {
-                        behaviour->DrawInspector();
-                    }
-
-                    ImGui::Unindent();
-                    ImGui::PopID();
-                    ImGui::Separator();
-                }
-            }
-            ImGui::PopID();
-        }
-        ImGui::End();
     }
 
     void Game::KeyCallback(int key, int scancode, int action, int mods)

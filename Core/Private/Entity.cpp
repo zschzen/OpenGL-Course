@@ -1,7 +1,5 @@
 #include "../Public/Entity.h"
 
-#include "../Public/GUID.h"
-
 namespace Vosgi
 {
 
@@ -9,13 +7,12 @@ namespace Vosgi
     {
         name = std::string("New Entity");
         tag = std::string("Untagged");
-        GUID = RandomGUID(8);
 
         AssignEvents();
     }
 
     Entity::Entity(std::string name, std::string tag)
-        : name(name), tag(tag), GUID(RandomGUID(8))
+        : name(name), tag(tag)
     {
         AssignEvents();
     }
@@ -123,6 +120,86 @@ namespace Vosgi
             child->DrawSelfAndChildren(deltaTime, frustum, shader, display, draw, total);
         }
     }
+
+    void Entity::DrawInspector()
+    {
+        ImGui::PushID((void*)GUID.c_str());
+
+        bool isEnabled = enabled;
+        if (ImGui::Checkbox(("##" + name).c_str(), &isEnabled)) {
+            enabled = isEnabled;
+        }
+        ImGui::SameLine();
+        if (!ImGui::CollapsingHeader(name.c_str())) {
+            ImGui::PopID(); // Corrected: Added PopID here
+            return;
+        }
+
+        // ImGui::SameLine();
+        ImGui::Text("Tag: %s", tag.c_str());
+        ImGui::Text("GUID: %s", GetGUID().c_str());
+        ImGui::Separator();
+
+        // Transform
+        ImGui::SliderFloat3("Position", (float*)&transform.position, -100.0f, 100.0f);
+
+        // Retrieve the Euler angles in degrees
+        glm::vec3 eulerDegrees = transform.rotation.GetEulerAnglesDegrees();
+        // Create a Float3 widget to edit the Euler angles
+        if (ImGui::SliderFloat3("Rotation", (float*)&eulerDegrees, -180.0f, 180.0f)) {
+            // Set the Euler angles in degrees
+            transform.rotation.SetEulerAngles(glm::radians(eulerDegrees));
+            transform.SetDirty();
+        }
+
+        ImGui::SliderFloat3("Scale", (float*)&transform.localScale, 0.0f, 100.0f);
+        transform.SetDirty();
+
+        ImGui::Separator();
+        for (auto& behaviour : behaviours) {
+            ImGui::PushID((void*)behaviour.get());
+
+            // Get the type name of the behaviour
+            std::string typeName = typeid(*behaviour).name();
+            // cut any numbers from the start of the string
+            typeName = typeName.substr(typeName.find_first_not_of("0123456789"));
+
+            // add empty space for indentation
+            ImGui::Indent();
+
+            bool isEnabled1 = behaviour->enabled;
+            if (ImGui::Checkbox(("##" + typeName).c_str(), &isEnabled1)) {
+                behaviour->enabled = isEnabled1;
+            }
+            ImGui::SameLine();
+            if (ImGui::CollapsingHeader(typeName.c_str())) {
+                ImGui::PushID((void*)behaviour->GetGUID().c_str());
+                ImGui::Text("GUID: %s", behaviour->GetGUID().c_str());
+                behaviour->DrawInspector();
+                ImGui::PopID();
+            }
+
+            ImGui::PopID();
+            ImGui::Unindent();
+            ImGui::Separator();
+        }
+
+        // Children
+        if (!children.empty())
+        {
+            ImGui::Text("Children: %d", static_cast<int>(children.size()));
+            ImGui::Indent();
+            for (auto &child: children) {
+                ImGui::PushID((void *) child.get());
+                child->DrawInspector();
+                ImGui::PopID();
+            }
+            ImGui::Unindent();
+        }
+
+        ImGui::PopID(); // Corrected: Added PopID here
+    }
+
 
     void Entity::AssignEvents()
     {
