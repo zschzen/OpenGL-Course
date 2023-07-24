@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <memory>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -15,8 +16,9 @@ namespace Vosgi
     {
     public:
         // Constructors
-        Transform();
+        Transform() = default;
         Transform(glm::vec3 pos, glm::quat rot, glm::vec3 scale);
+        ~Transform();
 
         // Getters
         const glm::mat4 &GetModel() const { return m_model; }
@@ -104,9 +106,6 @@ namespace Vosgi
         void ComputeModelMatrix();
         void ComputeModelMatrix(glm::mat4 parentModel);
 
-        // Destructor
-        ~Transform();
-
     public:
         // Member variables
         glm::vec3 position = {0.0f, 0.0f, 0.0f};
@@ -120,7 +119,7 @@ namespace Vosgi
     protected:
         glm::mat4 m_model = glm::mat4(1.0f);
 
-        bool m_isDirty = true;
+        bool m_isDirty = true;\
 
     private:
         // Helper function

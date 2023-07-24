@@ -14,7 +14,7 @@
 #include <functional>
 #include <string>
 
-unsigned char RandomByte()
+inline unsigned char RandomByte()
 {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -22,7 +22,7 @@ unsigned char RandomByte()
     return static_cast<unsigned char>(dis(gen));
 }
 
-std::string RandomGUID(const unsigned int len = 32)
+inline std::string RandomGUID(const unsigned int len = 32)
 {
     std::stringstream ss;
     for (auto i = 0; i < len; i++)

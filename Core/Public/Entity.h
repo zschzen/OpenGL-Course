@@ -88,10 +88,13 @@ namespace Vosgi
             });
         }
 
+    public:
         void UpdateSelfAndChildren();
         void ForceUpdateSelfAndChildren();
 
         void DrawSelfAndChildren(float deltaTime, const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw, unsigned int& total);
+
+        void DrawInspector();
 
     public:
         std::string name = "New Entity";
@@ -105,7 +108,7 @@ namespace Vosgi
         std::list<std::unique_ptr<Behaviour>> behaviours = std::list<std::unique_ptr<Behaviour>>();
         Entity* parent = nullptr;
 
-        std::string GUID = std::string();
+        std::string GUID = RandomGUID(8);
 
     private:
         void AssignEvents();

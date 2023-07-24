@@ -37,7 +37,7 @@ void PointLight::Draw(const Frustum &frustum, Shader &shader, unsigned int &disp
     shader.SetFloat((str + "base.ambientIntensity").c_str(), ambientIntensity);
     shader.SetFloat((str + "base.diffuseIntensity").c_str(), diffuseIntensity);
 
-    shader.SetVec3((str + "position").c_str(), transform->position);
+    shader.SetVec3((str + "position").c_str(), transform->GetModel()[3]);
     shader.SetFloat((str + "constant").c_str(), constant);
     shader.SetFloat((str + "linear").c_str(), linear);
     shader.SetFloat((str + "quadratic").c_str(), quadratic);

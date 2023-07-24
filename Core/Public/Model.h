@@ -30,14 +30,14 @@ class Model : public Vosgi::Behaviour
 {
 public:
     Model();
-    explicit Model(const char* path);
+    Model(const char* path);
     Model(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
     ~Model() override;
 
-    void Render(Shader& shader, unsigned int& draw);
     void Clear();
 
     void Draw(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw) override;
+    void DrawInspector() override;
 
     const std::vector<Mesh*>& GetMeshes() const { return meshes; }
 
@@ -45,7 +45,7 @@ public:
 
 private:
     std::vector<Mesh*> meshes = std::vector<Mesh*>();
-    std::vector<Texture> texturesLoaded = std::vector<Texture>(); 
+    std::vector<Texture> texturesLoaded = std::vector<Texture>();
     std::string directory = std::string();   
     std::unique_ptr<Vosgi::AABB> aabb;
 
@@ -55,6 +55,9 @@ private:
 
     std::vector<Texture> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
     unsigned int TextureFromFile(const char* path, const std::string& directory, bool gamma = false);
+
+private:
+    bool m_isWireframe = false;
 };
 
 #endif // !__MODEL_H__

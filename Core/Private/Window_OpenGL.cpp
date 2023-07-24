@@ -141,7 +141,7 @@ namespace Vosgi
             PollEvents();
 
             // Clear the window
-            glClearColor(.95f, 0.65f, 0.95f, 1.0f);
+            glClearColor(1.f, 1.f, 1.f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             // Start the ImGui frame
@@ -156,10 +156,10 @@ namespace Vosgi
             // Draw FPS sampler
             ImGui::SetNextWindowPos(ImVec2(0, 0));
             ImGui::SetNextWindowSize(ImVec2(0, 0));
-            ImGui::Begin("FPS");
+            ImGui::Begin("Profiler");
             fps_values[fps_values_offset] = 1.0f / deltaTime;
             fps_values_offset = (fps_values_offset + 1) % IM_ARRAYSIZE(fps_values);
-            char buffer[32];
+            char buffer[50];
             sprintf(buffer, "FPS: %.2f (%.2fms)\n\nDisplay: %d\nDraw: %d\nEntity: %d", 1.0f / deltaTime, deltaTime * 1000, displayCount, drawCount, entityCount);
 
             ImGui::PlotLines(buffer, fps_values, IM_ARRAYSIZE(fps_values), fps_values_offset, NULL, 0.0f, 100.0f, ImVec2(0, 120));

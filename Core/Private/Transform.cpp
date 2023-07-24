@@ -1,14 +1,8 @@
 #include "../Public/Transform.h"
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <stdio.h>
 
 namespace Vosgi
 {
-    Transform::Transform()
-    {
-    }
-
     Transform::Transform(glm::vec3 pos, glm::quat rot, glm::vec3 scale)
     {
         position = pos;

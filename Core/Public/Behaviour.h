@@ -4,10 +4,12 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include "Transform.h"
 #include "Observable.h"
 #include "imgui/imgui.h"
+#include "GUID.h"
 
 // Forward declaration
 class Entity;
@@ -42,7 +44,7 @@ namespace Vosgi
         virtual void Draw(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw) {}
         virtual void Terminate() {}
 
-        virtual void DrawInspector() {}
+        virtual void DrawInspector() = 0;
 
         inline bool IsActive() { return enabled; }
 
@@ -51,6 +53,13 @@ namespace Vosgi
         Vosgi::Transform* transform = nullptr;
 
         Observable<bool> enabled = true;
+
+    public:
+        [[nodiscard]] std::string GetGUID() const { return GUID; }
+
+    private:
+        // guid
+        std::string GUID = RandomGUID(8);
     };
 }
 #endif // !__BEHAVIOUR_H__

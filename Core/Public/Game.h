@@ -51,9 +51,6 @@ namespace Vosgi
 
         Camera* camera;
         Material shinyMaterial;
-        DirectionalLight* directionalLight;
-        PointLight* pointLight;
-        SpotLight* spotLight;
 
         std::vector<std::unique_ptr<Entity>> entities = std::vector<std::unique_ptr<Entity>>();
     };
