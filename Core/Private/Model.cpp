@@ -4,8 +4,6 @@
 #include <stb/stb_image.h>
 
 #include "../Public/Shader.h"
-#include "../Public/MeshData.h"
-#include "../Public/Frustum.h"
 
 Model::Model() : Behaviour()
 {
@@ -29,26 +27,27 @@ Model::~Model()
     Clear();
 }
 
-void Model::Render(Shader& shader, unsigned int& draw)
-{
-    for (auto& mesh : meshes)
-    {
-        mesh->Draw(shader);
-        draw++;
-    }
-}
-
 void Model::Draw(const Frustum& frustum, Shader& shader, unsigned int& display, unsigned int& draw)
 {
     if (!aabb->isOnFrustum(frustum, *transform)) return;
+
+    if (m_isWireframe)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
 
     shader.SetMat4("model", transform->GetModel());
     for (auto& mesh : meshes)
     {
         mesh->Draw(shader);
-        draw++;
+        ++draw;
     }
-    display++;
+    ++display;
+
+    if (m_isWireframe)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
 }
 
 void Model::Clear()
@@ -60,6 +59,11 @@ void Model::Clear()
     }
     meshes.clear();
     delete transform;
+}
+
+void Model::DrawInspector()
+{
+    ImGui::Checkbox("Wireframe", &m_isWireframe);
 }
 
 Vosgi::AABB* Model::GetWorldAABB()
