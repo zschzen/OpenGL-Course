@@ -145,9 +145,16 @@ vec4 CalcSpotLights()
 
 void main()
 {
+    // texture
+    colour = texture(mainTexture, TexCoord);
+
+	// Discard pixels that are mostly transparent
+    if (colour.a < 0.1) discard;
+
+	// Calculate the final colour based on the light
 	vec4 finalColour = CalcLightByDirection(directionalLight.base, directionalLight.direction);
 	finalColour += CalcPointLights();
 	finalColour += CalcSpotLights();
 
-	colour = texture(mainTexture, TexCoord) * finalColour;
+	colour *= finalColour;
 }
