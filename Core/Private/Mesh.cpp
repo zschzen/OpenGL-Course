@@ -76,7 +76,7 @@ void Mesh::Draw(Shader& shader)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshFilter.IBO);
 
     // Draw the triangles
-    glDrawElements(GL_TRIANGLES, meshFilter.indices.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, static_cast<int>(meshFilter.indices.size()), GL_UNSIGNED_INT, nullptr);
 
     // Unbind
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
