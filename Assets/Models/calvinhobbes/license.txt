@@ -1,0 +1,11 @@
+Model Information:
+* title:	Calvin and Hobbes Log Bridge
+* source:	https://sketchfab.com/3d-models/calvin-and-hobbes-log-bridge-16f7cd3d670b46629b88764144d0b935
+* author:	npbehunin (https://sketchfab.com/npbehunin)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Calvin and Hobbes Log Bridge" (https://sketchfab.com/3d-models/calvin-and-hobbes-log-bridge-16f7cd3d670b46629b88764144d0b935) by npbehunin (https://sketchfab.com/npbehunin) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
