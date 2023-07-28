@@ -2,10 +2,14 @@
 
 #include <imgui/imgui.h>
 
+#include "../Public/Skybox.h"
+
 #include "../Public/Rotating.h"
 #include "../Public/DirectionalLight.h"
 #include "../Public/PointLight.h"
 #include "../Public/SpotLight.h"
+
+#include "../Public/Shapes.h"
 
 namespace Vosgi
 {
@@ -61,23 +65,33 @@ namespace Vosgi
         floorEntity->transform.SetPosition(glm::vec3(0.0f, -23.0f, 0.0f));
         floorEntity->transform.SetLocalScale(glm::vec3(10.0f, 10.0f, 10.0f));
 
-        // Flower
-        Entity *flowerEntity = new Entity("Calvin And Hobbes by npbehunin", "Untagged");
-        flowerEntity->AddBehaviour<Model>("Assets/Models/calvinhobbes/scene.gltf");
+        // Calvin and Hobbes
+        Entity *calvinEntity = new Entity("Calvin And Hobbes by npbehunin", "Untagged");
+        auto calvinModel = calvinEntity->AddBehaviour<Model>("Assets/Models/calvinhobbes/scene.gltf");
+        calvinModel->GetMaterial().specularIntensity = 0.0f;
 
-        // Lantern
-        Entity *lanternEntity = new Entity("Lantern", "Untagged");
-        lanternEntity->AddBehaviour<Model>("Assets/Models/Lantern/Lantern.obj");
-        lanternEntity->transform.SetPosition(glm::vec3(0.0f, -4.0f, 15.0f));
-        lanternEntity->transform.SetRotation(glm::quat(glm::radians(glm::vec3(0.0f, -90.0f, 0.0f))));
+        // Generated Mesh
+        //Entity *cubeEntity = new Entity("Cube", "Untagged");
+        //cubeEntity->AddBehaviour<Model>(Shapes::Cube());
 
         entities.push_back(std::unique_ptr<Entity>(cameraEntity));
         entities.push_back(std::unique_ptr<Entity>(mainLightEntity));
         entities.push_back(std::unique_ptr<Entity>(pointLightParent));
         entities.push_back(std::unique_ptr<Entity>(spotLightEntity));
-        entities.push_back(std::unique_ptr<Entity>(flowerEntity));
-        entities.push_back(std::unique_ptr<Entity>(lanternEntity));
+        entities.push_back(std::unique_ptr<Entity>(calvinEntity));
+        //entities.push_back(std::unique_ptr<Entity>(cubeEntity));
         entities.push_back(std::unique_ptr<Entity>(floorEntity));
+
+        // Create skybox
+        std::vector<std::string> cubeMapFaces = {
+                "Assets/Textures/Skybox/FS002_Day_Cubemap_right.png",
+                "Assets/Textures/Skybox/FS002_Day_Cubemap_left.png",
+                "Assets/Textures/Skybox/FS002_Day_Cubemap_up.png",
+                "Assets/Textures/Skybox/FS002_Day_Cubemap_down.png",
+                "Assets/Textures/Skybox/FS002_Day_Cubemap_back.png",
+                "Assets/Textures/Skybox/FS002_Day_Cubemap_front.png"
+        };
+        skybox = new Skybox(cubeMapFaces);
     }
 
     Game::~Game()
@@ -93,6 +107,8 @@ namespace Vosgi
 
     void Game::Draw(float deltaTime, unsigned int &displayCount, unsigned int &drawCount, unsigned int &entityCount)
     {
+        skybox->Draw(camera->calculateViewMatrix(), camera->getProjectionMatrix());
+
         camera->keyControl(keys, deltaTime);
 
         shader->Use();

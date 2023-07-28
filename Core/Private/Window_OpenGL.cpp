@@ -37,10 +37,8 @@ namespace Vosgi
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);                 // Set minor version to 3
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Use core profile (no backwards compatibility)
         glfwWindowHint(GLFW_SAMPLES, 4);                               // 4x antialiasing
-
-#ifdef __APPLE__
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Required for Mac
-#endif
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);           // Allow forward compatibility
+        glfwWindowHint(GLFW_DEPTH_BITS, 24);                           // Set depth buffer to 24 bits
 
         // Enable vsync
         glfwSwapInterval(1);
@@ -141,7 +139,7 @@ namespace Vosgi
             PollEvents();
 
             // Clear the window
-            glClearColor(1.f, 1.f, 1.f, 1.0f);
+            glClearColor(0.f, 1.f, 1.f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             // Start the ImGui frame
@@ -165,8 +163,12 @@ namespace Vosgi
             ImGui::PlotLines(buffer, fps_values, IM_ARRAYSIZE(fps_values), fps_values_offset, NULL, 0.0f, 100.0f, ImVec2(0, 120));
 
             // Set new fps
-            ImGui::SliderInt("Max FPS", &maxFPS, 1, 144);
-            desiredFrameTime = 1.0 / maxFPS;
+            int currentFPS = maxFPS;
+            if (ImGui::SliderInt("FPS", &currentFPS, 1, 144))
+            {
+                maxFPS = currentFPS;
+                desiredFrameTime = 1.0f / static_cast<float>(maxFPS);
+            }
 
             ImGui::End();
             # endif

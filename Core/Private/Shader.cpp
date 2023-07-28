@@ -1,7 +1,6 @@
 #include "../Public/Shader.h"
 
 // initialize static map of shaders
-std::map<std::string, GLuint> Shader::uniformLocations = std::map<std::string, GLuint>();
 std::vector<Shader*> Shader::shaders = std::vector<Shader*>();
 
 Shader::Shader()
@@ -90,6 +89,14 @@ void Shader::CompileShader(const char* vertexCode, const char* fragmentCode)
         printf("Error linking program: '%s'\n", eLog);
         return;
     }
+
+    Validate();
+}
+
+void Shader::Validate()
+{
+    GLint result = 0;
+    GLchar eLog[1024] = { 0 };
 
     glValidateProgram(shaderID);
     glGetProgramiv(shaderID, GL_VALIDATE_STATUS, &result);
@@ -191,6 +198,12 @@ std::string Shader::GetAbsolutePath(const char* fileLocation)
         path = std::filesystem::absolute(path);
     }
     return path.generic_string();
+}
+
+GLuint Shader::GetCachedUniformLocation(const char* name)
+{
+    if (IsCached(name)) return uniformLocations[name];
+    return 0;
 }
 
 void Shader::SetGlobalBool(const char* name, bool value)

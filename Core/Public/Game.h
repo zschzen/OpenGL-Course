@@ -21,6 +21,7 @@ class Shader;
 class PointLight;
 class SpotLight;
 class DirectionalLight;
+class Skybox;
 
 namespace Vosgi
 {
@@ -50,7 +51,9 @@ namespace Vosgi
         bool mouseFirstMoved = true;
 
         Camera* camera;
+        Skybox* skybox;
 
+    private:
         std::vector<std::unique_ptr<Entity>> entities = std::vector<std::unique_ptr<Entity>>();
     };
 } // namespace Vosgi

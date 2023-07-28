@@ -23,6 +23,8 @@ public:
 
     std::string ReadFile(const char* fileLocation);
 
+    void Validate();
+
     void SetBool(const char* name, bool value);
     void SetInt(const char* name, int value);
     void SetFloat(const char* name, float value);
@@ -61,17 +63,22 @@ public:
     static void SetGlobalVec4(const char* name, float x, float y, float z, float w);
     static void SetGlobalMat4(const char* name, glm::mat4 value);
 
+public:
+    // Get uniform location from cache
+    GLuint GetCachedUniformLocation(const char* name);
+
+    // Check if a uniform location is already cached
+    inline bool IsCached(const char* name) { return uniformLocations.find(name) != uniformLocations.end(); }
+
+private:
+    // Map of all uniform locations
+    std::map<std::string, GLuint> uniformLocations;
+
 private:
     // static list of all shaders
     static std::vector<Shader*> shaders;
 
-    // Map of all uniform locations
-    static std::map<std::string, GLuint> uniformLocations;
-
 public:
     // Get the sahders in a list
     static std::vector<Shader*> GetShaders() { return shaders; }
-
-    // Check if a uniform location is already cached
-    static inline bool IsCached(const char* name) { return uniformLocations.find(name) != uniformLocations.end(); }
 };
