@@ -16,6 +16,12 @@ Model::Model(const char* path) : Behaviour()
     aabb = std::make_unique<Vosgi::AABB>(Vosgi::generateAABB(meshes));
 }
 
+Model::Model(const MeshData subMesh) : Behaviour()
+{
+    meshes.push_back(new Mesh(subMesh));
+    aabb = std::make_unique<Vosgi::AABB>(Vosgi::generateAABB(meshes));
+}
+
 Model::Model(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
 {
     meshes.push_back(new Mesh(vertices, indices, textures));

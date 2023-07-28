@@ -4,6 +4,11 @@
 
 #include "../Public/Shader.h"
 
+Mesh::Mesh(MeshData meshData)
+{
+    Update(std::move(meshData.vertices), std::move(meshData.indices), std::move(meshData.textures));
+}
+
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
 {
     Update(std::move(vertices), std::move(indices), std::move(textures));
@@ -11,17 +16,17 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 
 void Mesh::Update(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
 {
-    SubMesh subMesh = SubMesh(vertices, indices, std::move(textures));
+    MeshData meshData = MeshData(vertices, indices, std::move(textures));
 
-    glGenVertexArrays(1, &subMesh.VAO);
-    glBindVertexArray(subMesh.VAO);
+    glGenVertexArrays(1, &meshData.VAO);
+    glBindVertexArray(meshData.VAO);
 
-    glGenBuffers(1, &subMesh.IBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, subMesh.IBO);
+    glGenBuffers(1, &meshData.IBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshData.IBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
-    glGenBuffers(1, &subMesh.VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, subMesh.VBO);
+    glGenBuffers(1, &meshData.VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, meshData.VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
     // Position
@@ -41,7 +46,7 @@ void Mesh::Update(std::vector<Vertex> vertices, std::vector<unsigned int> indice
 
     glBindVertexArray(0);
 
-    meshFilter = subMesh;
+    meshFilter = meshData;
 }
 
 void Mesh::ActivateTextures(Shader& shader)
@@ -70,6 +75,15 @@ void Mesh::Draw(Shader& shader)
 {
     ActivateTextures(shader);
 
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_CULL_FACE);
+
+    RenderMesh();
+}
+
+void Mesh::RenderMesh()
+{
     // Draw mesh
     glBindVertexArray(meshFilter.VAO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshFilter.IBO);
@@ -105,7 +119,7 @@ void Mesh::Clear()
     meshFilter.indices.clear();
     meshFilter.vertices.clear();
     meshFilter.textures.clear();
-    meshFilter = SubMesh();
+    meshFilter = MeshData();
 }
 
 Mesh::~Mesh()

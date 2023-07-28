@@ -8,12 +8,12 @@
 
 struct Vertex
 {
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec2 texCoords;
+    glm::vec3 position{};
+    glm::vec3 normal{};
+    glm::vec2 texCoords{};
 
     // Constructor
-    Vertex() {}
+    Vertex() = default;
 
     Vertex(glm::vec3 pos, glm::vec3 norm, glm::vec2 tex)
     {
@@ -23,7 +23,7 @@ struct Vertex
     }
 };
 
-struct SubMesh
+struct MeshData
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -32,9 +32,9 @@ struct SubMesh
     GLuint VAO{}, VBO{}, IBO{};
 
     // Constructor
-    SubMesh() = default;
+    MeshData() = default;
 
-    SubMesh(std::vector<Vertex> verts, std::vector<unsigned int> inds, std::vector<Texture> texs)
+    MeshData(std::vector<Vertex> verts, std::vector<unsigned int> inds, std::vector<Texture> texs)
     {
         vertices = std::move(verts);
         indices = std::move(inds);

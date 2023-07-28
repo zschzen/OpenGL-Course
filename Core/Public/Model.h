@@ -17,12 +17,14 @@
 // Forward declaration
 class Shader;
 struct Vertex;
+struct MeshData;
 
 class Model : public Vosgi::Behaviour
 {
 public:
     Model();
     Model(const char* path);
+    Model(const MeshData subMesh);
     Model(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
     ~Model() override;
 
@@ -34,6 +36,8 @@ public:
     const std::vector<Mesh*>& GetMeshes() const { return meshes; }
 
     Vosgi::AABB* GetWorldAABB();
+
+    Material& GetMaterial() { return material; }
 
 private:
     std::vector<Mesh*> meshes = std::vector<Mesh*>();

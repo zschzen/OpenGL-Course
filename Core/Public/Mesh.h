@@ -18,7 +18,7 @@ class Mesh
 {
 public:
     Mesh() = default;
-    Mesh(SubMesh subMesh);
+    Mesh(MeshData meshData);
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
     ~Mesh();
 
@@ -26,6 +26,7 @@ public:
 
     void ActivateTextures(Shader& shader);
     void Draw(Shader& shader);
+    void RenderMesh();
     void Clear();
 
     // Get vertices, indices and textures
@@ -34,5 +35,5 @@ public:
     const std::vector<Texture>& GetTextures() const { return meshFilter.textures; }
 
 protected:
-    SubMesh meshFilter = SubMesh();
+    MeshData meshFilter = MeshData();
 };
