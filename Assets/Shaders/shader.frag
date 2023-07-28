@@ -147,7 +147,7 @@ vec4 CalcSpotLights()
 void main()
 {
     // texture
-    colour = material.baseColour * texture(mainTexture, TexCoord);
+    colour = texture(mainTexture, TexCoord) * vec4(material.baseColour, 1.0f);
 
 	// Discard pixels that are mostly transparent
     if (colour.a < 0.1) discard;
