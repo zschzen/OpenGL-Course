@@ -287,3 +287,18 @@ unsigned int Model::TextureFromFile(const char* path, const std::string& directo
 
     return textureID;
 }
+
+void Model::SetTexture(const char* path, const std::string& directory, bool gamma)
+{
+    Texture texture;
+    texture.id = TextureFromFile(path, directory, gamma);
+    texture.type = "texture_diffuse";
+    texture.path = path;
+    texturesLoaded.push_back(texture);
+
+    for (auto& mesh : meshes)
+    {
+        mesh->ClearTextures();
+        mesh->SetTexture(texture);
+    }
+}

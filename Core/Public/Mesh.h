@@ -34,6 +34,12 @@ public:
     const std::vector<unsigned int>& GetIndices() const { return meshFilter.indices; }
     const std::vector<Texture>& GetTextures() const { return meshFilter.textures; }
 
+    // Clear textures
+    void ClearTextures() { meshFilter.textures.clear(); }
+
+    // Alter texture
+    void SetTexture(Texture texture) { meshFilter.textures.push_back(texture); }
+
 protected:
     MeshData meshFilter = MeshData();
 };

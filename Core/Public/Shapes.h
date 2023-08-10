@@ -8,6 +8,34 @@
 class Shapes
 {
 public:
+    static MeshData Quad(float width = 1.f, float height = 1.f)
+    {
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+
+        // Calculate half of width and height
+        const float w2 = width / 2.f;
+        const float h2 = height / 2.f;
+
+        // Create vertices
+        vertices.emplace_back(glm::vec3(-w2, -h2, 0.f), glm::vec3(0.f, 0.f, 1.f), glm::vec2(0.f, 0.f));
+        vertices.emplace_back(glm::vec3(w2, -h2, 0.f), glm::vec3(0.f, 0.f, 1.f), glm::vec2(1.f, 0.f));
+        vertices.emplace_back(glm::vec3(w2, h2, 0.f), glm::vec3(0.f, 0.f, 1.f), glm::vec2(1.f, 1.f));
+        vertices.emplace_back(glm::vec3(-w2, h2, 0.f), glm::vec3(0.f, 0.f, 1.f), glm::vec2(0.f, 1.f));
+
+        // Create indices
+        indices.emplace_back(0);
+        indices.emplace_back(1);
+        indices.emplace_back(2);
+        indices.emplace_back(2);
+        indices.emplace_back(3);
+        indices.emplace_back(0);
+
+        std::vector<Texture> textures{}; // You can add textures here if needed
+
+        return {vertices, indices, textures};
+    }
+
     static MeshData Sphere(float radius = 1.f, int numSegments = 16.f)
     {
         std::vector<Vertex> vertices;
@@ -145,6 +173,56 @@ public:
         }
 
         std::vector<Texture> textures; // You can add textures here if needed
+
+        return {vertices, indices, textures};
+    }
+
+    static MeshData Torus(float majorRadius = 1.f, float minorRadius = 0.5f, int numMajorSegments = 16.f, int numMinorSegments = 16.f)
+    {
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+
+        for (int i = 0; i <= numMajorSegments; ++i)
+        {
+            const float phi = glm::two_pi<float>() * static_cast<float>(i) / static_cast<float>(numMajorSegments);
+            for (int j = 0; j <= numMinorSegments; ++j)
+            {
+                const float theta = glm::two_pi<float>() * static_cast<float>(j) / static_cast<float>(numMinorSegments);
+                float x = (majorRadius + minorRadius * cos(theta)) * cos(phi);
+                float y = (majorRadius + minorRadius * cos(theta)) * sin(phi);
+                float z = minorRadius * sin(theta);
+                glm::vec3 pos(x, y, z);
+
+                // Calculate texture coordinates based on spherical coordinates
+                float u = static_cast<float>(j) / static_cast<float>(numMinorSegments);
+                float v = static_cast<float>(i) / static_cast<float>(numMajorSegments);
+                glm::vec2 tex(u, v);
+
+                // Calculate normal vector using cross product of tangent vectors
+                glm::vec3 du(-sin(phi), cos(phi), 0.f);
+                glm::vec3 dv(-sin(theta) * cos(phi), -sin(theta) * sin(phi), cos(theta));
+                glm::vec3 norm = glm::normalize(glm::cross(du, dv));
+
+                vertices.emplace_back(pos, norm, tex);
+
+                // Add indices if we're not at the first row or first vertex of the current row
+                if (i > 0 && j > 0)
+                {
+                    unsigned int a = (i - 1) * (numMinorSegments + 1) + j - 1;
+                    unsigned int b = (i - 1) * (numMinorSegments + 1) + j;
+                    unsigned int c = i * (numMinorSegments + 1) + j;
+                    unsigned int d = i * (numMinorSegments + 1) + j - 1;
+                    indices.push_back(a);
+                    indices.push_back(b);
+                    indices.push_back(c);
+                    indices.push_back(c);
+                    indices.push_back(d);
+                    indices.push_back(a);
+                }
+            }
+        }
+
+        std::vector<Texture> textures{}; // You can add textures here if needed
 
         return {vertices, indices, textures};
     }

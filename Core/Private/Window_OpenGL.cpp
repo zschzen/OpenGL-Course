@@ -105,13 +105,14 @@ namespace Vosgi
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init("#version 330");
 
-        do
+        while (!glfwWindowShouldClose(window))
         {
             // Resize the viewport
             glfwGetFramebufferSize(window, &bufferWidth, &bufferHeight);
             glViewport(0, 0, bufferWidth, bufferHeight);
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
+            glCullFace(GL_BACK);
 
             // Calculate delta time
             CalculateDeltaTime();
@@ -179,7 +180,7 @@ namespace Vosgi
 
             SwapBuffers();
 
-        } while (!glfwWindowShouldClose(window));
+        }
 
         // Terminate window
         Terminate();

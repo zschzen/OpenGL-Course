@@ -39,6 +39,9 @@ public:
 
     Material& GetMaterial() { return material; }
 
+    // Alter texture
+    void SetTexture(const char* path, const std::string& directory, bool gamma = false);
+
 private:
     std::vector<Mesh*> meshes = std::vector<Mesh*>();
     std::vector<Texture> texturesLoaded = std::vector<Texture>();

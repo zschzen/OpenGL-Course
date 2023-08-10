@@ -61,9 +61,11 @@ namespace Vosgi
 
         // Floor
         Entity *floorEntity = new Entity("Floor", "Untagged");
-        floorEntity->AddBehaviour<Model>("Assets/Models/Floor/Floor.obj");
-        floorEntity->transform.SetPosition(glm::vec3(0.0f, -23.0f, 0.0f));
-        floorEntity->transform.SetLocalScale(glm::vec3(10.0f, 10.0f, 10.0f));
+        auto floorModel = floorEntity->AddBehaviour<Model>(Shapes::Quad());
+        floorModel->SetTexture("white.png", "Assets/Textures");
+        floorEntity->transform.SetPosition(glm::vec3(0.0f, -1.0f, 0.0f));
+        floorEntity->transform.SetRotation(glm::quat(glm::radians(glm::vec3(-90.0f, 0.0f, 0.0f))));
+        floorEntity->transform.localScale = glm::vec3(100.0f, 100.0f, 100.0f);
 
         // Calvin and Hobbes
         Entity *calvinEntity = new Entity("Calvin And Hobbes by npbehunin", "Untagged");
@@ -179,7 +181,7 @@ namespace Vosgi
         // control camera fov
         float fov = camera->getFov() - static_cast<float>(yOffset);
         fov = glm::clamp(fov, 1.0f, 120.0f);
-        camera->setFov(fov);
+        camera->fov = fov;
     }
 
 }
